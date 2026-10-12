@@ -2,212 +2,334 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Último Trem para Lugar Nenhum — Protótipo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Último Trem para Lugar Nenhum</title>
 <style>
-:root{--bg:#07111d;--panel:#0b1c2b;--line:#23506c;--cyan:#55d7ff;--text:#e8f5ff;--muted:#91abc0;--purple:#b58aff;--red:#ff6d78;--green:#6ef0b0}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#14334b 0,#07111d 58%);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-button{font:inherit;color:inherit;background:#102b40;border:1px solid #2a5d7a;border-radius:10px;padding:10px 13px;cursor:pointer;transition:.15s}button:hover{background:#17415d;border-color:var(--cyan)}button:disabled{opacity:.35;cursor:not-allowed}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid #17374d;background:#06101bd9;position:sticky;top:0;z-index:5;backdrop-filter:blur(10px)}
-.logo{font-weight:900;letter-spacing:.08em;font-size:clamp(16px,3vw,25px);line-height:1.05}.logo span{display:block;color:var(--cyan);font-size:.62em;letter-spacing:.22em;margin-top:5px}
-.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{border:1px solid var(--line);border-radius:10px;padding:7px 12px;background:#0b1d2b;min-width:90px}.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.stat strong{font-size:18px}
-main{max-width:1400px;margin:auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}.stage{min-width:0}.canvas-wrap{position:relative;border:1px solid #24506a;border-radius:16px;overflow:hidden;background:#07121e;box-shadow:0 20px 60px #0007}canvas{display:block;width:100%;height:auto;touch-action:none}
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:#030a12c9;backdrop-filter:blur(5px);z-index:2}.modal{width:min(480px,100%);padding:24px;border:1px solid #36708e;background:linear-gradient(145deg,#102a3d,#081522);border-radius:18px;box-shadow:0 15px 60px #0008}.modal h1{font-size:clamp(25px,5vw,38px);line-height:1.05;margin:0 0 12px}.modal p{color:#bfd2e2}.modal .accent{color:var(--cyan)}.modal .primary{width:100%;background:linear-gradient(90deg,#087eae,#1769a1);border:0;font-weight:800;padding:13px;margin-top:10px}.modal .secondary{width:100%;margin-top:8px}
-.side{display:flex;flex-direction:column;gap:12px}.panel{border:1px solid var(--line);background:linear-gradient(150deg,#0d2131,#081521);border-radius:14px;padding:15px;min-width:0}.panel h2{margin:0 0 10px;font-size:14px;color:var(--cyan);text-transform:uppercase;letter-spacing:.12em}.role{font-size:20px;font-weight:900;color:var(--purple);margin-bottom:5px}.role.passenger{color:var(--green)}.sub{color:var(--muted);font-size:13px}.task{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #17354a}.task:last-child{border:0}.dot{width:18px;height:18px;flex:0 0 18px;border:2px solid #527d96;border-radius:5px;margin-top:1px}.task.done .dot{background:var(--green);border-color:var(--green);box-shadow:inset 0 0 0 3px #0b1c2b}.task.done .taskname{text-decoration:line-through;color:#769b9a}.taskname{font-weight:650}.task small{display:block;color:var(--muted);margin-top:2px}.bar{height:8px;background:#172e40;border-radius:8px;overflow:hidden;margin:10px 0 4px}.bar span{height:100%;display:block;background:linear-gradient(90deg,#31c6ff,#72f1b1);width:0;transition:width .3s}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{font-size:13px;padding:10px 8px}.feed{height:140px;overflow:auto;font-size:12px;color:#a9c2d5}.feed div{padding:5px 0;border-bottom:1px solid #142d40}.feed .alert{color:#ffbd79}.feed .good{color:var(--green)}
-.hud{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}.kbd{display:inline-block;padding:2px 6px;border:1px solid #355a70;border-radius:5px;color:#d5eafa;background:#0b1b28}
-.mobile-controls{display:none;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,42px);gap:5px;justify-content:center;margin-top:10px}.mobile-controls button{padding:0;font-size:18px}.mobile-controls .up{grid-column:2}.mobile-controls .left{grid-column:1;grid-row:2}.mobile-controls .down{grid-column:2;grid-row:2}.mobile-controls .right{grid-column:3;grid-row:2}
-#taskModal .puzzle-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.puzzle-board button{min-height:58px;font-size:20px}.puzzle-board button.selected{border-color:var(--cyan);background:#14506b;box-shadow:0 0 0 2px #55d7ff33}
-.puzzle-note{color:var(--muted);font-size:13px}
-@media(max-width:850px){main{grid-template-columns:1fr;padding:10px}.side{display:grid;grid-template-columns:1fr 1fr}.side .panel:first-child,.side .panel:last-child{grid-column:1/-1}.feed{height:95px}header{padding:10px 12px}.stats{gap:5px}.stat{padding:5px 8px;min-width:70px}.stat strong{font-size:15px}}
-@media(max-width:520px){.side{display:flex}.logo{font-size:16px}.stat small{font-size:9px}.stat strong{font-size:14px}.mobile-controls{display:grid}.hud{font-size:11px}.panel{padding:12px}}
-
-/* Menu deluxe e personalização */
-.menu-card{max-width:650px;width:100%;max-height:92vh;overflow:auto}.menu-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}.logo-mark{width:58px;height:58px;flex:0 0 58px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#1aa9db,#6547ad);font-size:30px;box-shadow:0 0 30px #24baff40}.eyebrow{color:#55d7ff;font-size:11px;font-weight:900;letter-spacing:.2em}.menu-card h1{font-size:clamp(29px,6vw,46px);letter-spacing:-.04em;margin:5px 0 8px}.menu-card p{margin:8px 0}.custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.custom-box{border:1px solid #234b64;border-radius:12px;padding:12px;background:#071724}.custom-box label{display:block;font-size:11px;color:#91abc0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}.custom-box input,.custom-box select{width:100%;border:1px solid #2a526a;background:#0b1d2b;color:#e8f5ff;border-radius:8px;padding:10px;font:inherit;min-width:0}.swatches{display:flex;gap:8px;flex-wrap:wrap}.swatch{width:28px;height:28px;border-radius:50%;padding:0;border:2px solid #ffffff35;box-shadow:inset 0 0 0 2px #071724}.swatch.active{outline:2px solid #fff;outline-offset:2px}.avatar-preview{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#071724;border:1px solid #234b64}.avatar-chip{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:24px;background:#1b3b4d}.menu-features{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.feature{background:#0a1b29;border:1px solid #1c3c51;border-radius:10px;padding:10px;font-size:12px;color:#bdd1df}.feature b{display:block;color:#eaf8ff;font-size:13px;margin-bottom:3px}.ghost-action{border-color:#7048a5;background:#291b43}.ghost-action:hover{background:#39235d}.notice{font-size:12px;color:#8da8bd}.hud-pill{border:1px solid #24506a;border-radius:20px;padding:4px 9px;color:#c2e4f5;background:#0b1d2b}.energy-row{display:flex;align-items:center;gap:8px;margin-top:9px}.energy-row .bar{flex:1;margin:0}.energy-row small{color:var(--muted);font-size:11px;white-space:nowrap}
-@media(max-width:520px){.custom-grid{grid-template-columns:1fr 1fr}.menu-features{grid-template-columns:1fr}.menu-card{padding:17px}.logo-mark{width:45px;height:45px;flex-basis:45px}.custom-box{padding:9px}}
+:root{--c:#3fd0ff;--p:#b58aff;--g:#6ef0b0;--r:#ff6d78;--o:#ffb35c;--sa:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden;background:#050a12;color:#e8f5ff;font:600 14px/1.35 system-ui,-apple-system,sans-serif;touch-action:none}
+canvas#g{position:fixed;inset:0;width:100%;height:100%}
+button,input{font:inherit;color:inherit}
+.glass{background:rgba(8,18,32,.74);border:1px solid #2d6a8e;border-radius:14px;backdrop-filter:blur(8px);box-shadow:0 4px 18px #0008}
+#hud{position:fixed;inset:0;pointer-events:none}#hud>*{pointer-events:auto}
+#timer{position:absolute;top:calc(8px + var(--sa));left:50%;transform:translateX(-50%);display:flex;gap:12px;padding:6px 14px;align-items:center;font-size:19px;font-weight:800;white-space:nowrap}
+#timer small{display:block;font-size:9px;color:#8fb3c9;letter-spacing:.1em;text-transform:uppercase;font-weight:600}#timer i{width:1px;height:28px;background:#2d6a8e}
+#role{position:absolute;top:calc(8px + var(--sa));left:8px;width:46px;padding:6px;overflow:hidden;transition:.25s}#role.open{width:min(250px,60vw)}
+#role .h{display:flex;gap:8px;align-items:center;font-weight:800;font-size:13px;color:var(--g);white-space:nowrap}#role.gh .h{color:var(--p)}#role .ic{font-size:24px;flex:0 0 32px;text-align:center}
+#role .d{display:none;font-size:12px;color:#b9cddc;font-weight:500;margin-top:6px;white-space:normal}#role.open .d{display:block}
+#tasks{position:absolute;top:calc(8px + var(--sa));right:8px;width:min(190px,46vw);padding:8px 10px;font-size:12px}
+#tasks h4{margin:0;font-size:11px;color:var(--c);text-transform:uppercase;letter-spacing:.1em;display:flex;justify-content:space-between}
+.bar{height:6px;border-radius:6px;background:#172e40;margin:6px 0 2px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#31c6ff,#72f1b1);transition:width .3s}
+#tl{display:none;margin-top:4px}#tasks.open #tl{display:block}.tk{display:flex;gap:6px;padding:4px 0;border-top:1px solid #17354a;line-height:1.2}.tk b{font-weight:600}.tk .o{width:12px;height:12px;flex:0 0 12px;border:2px solid #527d96;border-radius:50%;margin-top:2px}.tk.d .o{background:var(--g);border-color:var(--g)}.tk.d b{text-decoration:line-through;color:#7aa59a}.tk.s .o{border-color:var(--r);box-shadow:0 0 6px var(--r)}
+#mini{position:absolute;top:calc(62px + var(--sa));left:50%;transform:translateX(-50%);width:min(300px,56vw);height:30px;border-radius:10px;padding:0}
+#log{position:absolute;left:10px;bottom:calc(170px + var(--sb));width:min(62vw,360px);font-size:12px;pointer-events:none!important;display:flex;flex-direction:column;gap:3px}
+#log div{background:rgba(5,12,22,.72);border-left:3px solid var(--c);padding:3px 8px;border-radius:0 8px 8px 0;animation:fo 7s forwards}#log .a{border-color:var(--o)}#log .g{border-color:var(--g)}
+@keyframes fo{0%,80%{opacity:1}100%{opacity:0}}
+#joy{position:absolute;left:18px;bottom:calc(22px + var(--sb));width:132px;height:132px;border-radius:50%;background:radial-gradient(#3fd0ff1a,#3fd0ff08);border:2px solid #3fd0ff55;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;border-radius:50%;background:radial-gradient(#7fe3ff,#1b86b3);box-shadow:0 0 16px #3fd0ff88;pointer-events:none}
+#btns{position:absolute;right:14px;bottom:calc(22px + var(--sb));display:grid;grid-template-columns:repeat(2,64px);gap:10px;justify-items:center;align-items:end}
+.rb{width:64px;height:64px;border-radius:50%;border:2px solid #3fd0ff88;background:rgba(8,28,46,.82);font-size:11px;font-weight:800;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.rb span{font-size:22px}
+.rb:active{transform:scale(.92)}.rb:disabled{opacity:.3}.rb.big{width:88px;height:88px;grid-column:2;border-color:var(--c);background:linear-gradient(#0f6b94,#0b3d5a);box-shadow:0 0 18px #3fd0ff66;font-size:13px}.rb.big span{font-size:30px}
+.rb.pu{border-color:var(--p);background:rgba(50,24,86,.85)}.rb.rd{border-color:var(--r);background:rgba(80,20,30,.85)}
+.scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5;overflow:auto;background:radial-gradient(ellipse at 50% 100%,#04101ccc,#030710ee)}
+.scr.clear{background:linear-gradient(#030710cc,#03071000 40%,#030710dd)}
+.sheet{width:min(440px,100%);padding:18px;border-radius:20px}
+.logo{text-align:center;margin-bottom:6px}.logo .tr{font-size:44px;filter:drop-shadow(0 0 12px #3fd0ff)}
+.logo h1{margin:0;font-size:clamp(34px,10vw,52px);line-height:.95;font-weight:900;font-style:italic;letter-spacing:.02em;color:#fff;text-shadow:0 0 18px #3fd0ff,0 3px 0 #0a5b80}
+.logo h2{margin:6px 0 0;font-size:clamp(13px,3.8vw,18px);letter-spacing:.3em;color:var(--c);font-weight:800}
+.mb{display:block;width:100%;padding:15px;margin-top:10px;border-radius:14px;border:1px solid #2d6a8e;background:rgba(10,32,52,.85);font-weight:800;font-size:16px;letter-spacing:.06em}
+.mb.pri{background:linear-gradient(90deg,#0a8cc2,#1a5fb0);border:0;box-shadow:0 0 22px #1aa0e066;font-size:18px}.mb:active{transform:scale(.98)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}.chip{padding:8px 11px;border-radius:20px;border:1px solid #2d6a8e;background:#0a2034;font-size:13px}.chip.on{background:#1a6a96;border-color:var(--c);box-shadow:0 0 10px #3fd0ff55}
+.sw{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}.sw b{width:32px;height:32px;border-radius:50%;border:2px solid #fff3}.sw b.on{outline:3px solid #fff;outline-offset:2px}
+.lb{font-size:11px;color:#8fb3c9;text-transform:uppercase;letter-spacing:.12em}
+input{width:100%;background:#0a1c2c;border:1px solid #2d6a8e;border-radius:10px;padding:10px;font-size:16px;margin:6px 0 12px;user-select:text;-webkit-user-select:text}
+#pv{display:block;margin:0 auto;background:radial-gradient(#1b4a6a,#0a1b2b);border-radius:16px;border:1px solid #2d6a8e}
+.sub{color:#9fbdd0;font-weight:500;font-size:13px}.pzb{display:grid;gap:10px;margin:14px 0}.pzb button{min-height:60px;font-size:24px;border-radius:14px;border:2px solid}
+.vote{display:flex;flex-direction:column;gap:7px;margin:10px 0}.vote button{padding:12px;border-radius:12px;border:1px solid #2d6a8e;background:#0a2034}
+.clue{font-size:13px;padding:6px 9px;border-left:3px solid var(--r);background:#0a1b29;margin:5px 0}
+@media(min-width:800px){#log{bottom:150px}}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">ÚLTIMO TREM <span>PARA LUGAR NENHUM</span></div>
-  <div class="stats">
-    <div class="stat"><small>Tempo restante</small><strong id="clock">08:00</strong></div>
-    <div class="stat"><small>Tripulação</small><strong id="players">6 ativos</strong></div>
-    <div class="stat"><small>Progresso</small><strong id="progress">0%</strong></div>
-  </div>
-</header>
-<main>
-<section class="stage">
- <div class="canvas-wrap">
-  <canvas id="game" width="960" height="600" aria-label="Mapa jogável do trem"></canvas>
-  <div class="overlay" id="startOverlay">
-   <div class="modal menu-card">
-    <div class="menu-top"><div class="logo-mark">🚆</div><div><div class="eyebrow">UMA AVENTURA DE DEDUÇÃO SOCIAL</div><div class="sub">MODO LOCAL · PROTÓTIPO 0.2</div></div></div>
-    <h1>ÚLTIMO TREM<br><span class="accent">PARA LUGAR NENHUM</span></h1>
-    <p>O mapa muda. Os sistemas falham. Alguém a bordo não é quem diz ser.</p>
-    <div class="menu-features"><div class="feature"><b>◈ Papéis secretos</b>Passageiro ou Fantasma</div><div class="feature"><b>⚡ Sabotagens</b>Interfira nos sistemas</div><div class="feature"><b>⌁ Puzzles</b>Repare o trem a tempo</div></div>
-    <div class="avatar-preview"><div class="avatar-chip" id="avatarPreview">●</div><div style="flex:1"><b id="previewName">Viajante</b><div class="sub" id="previewStyle">Visual padrão · Azul elétrico</div></div><span class="hud-pill">SEU PERSONAGEM</span></div>
-    <div class="custom-grid">
-     <div class="custom-box"><label for="playerName">Nome do personagem</label><input id="playerName" maxlength="14" value="Viajante" placeholder="Seu nome"></div>
-     <div class="custom-box"><label for="difficulty">Dificuldade</label><select id="difficulty"><option value="easy">Exploração</option><option value="normal" selected>Normal</option><option value="hard">Pesadelo</option></select></div>
-     <div class="custom-box"><label>Cor do traje</label><div class="swatches" id="swatches"></div></div>
-     <div class="custom-box"><label for="accessory">Acessório</label><select id="accessory"><option value="none">Nenhum</option><option value="cap">Boné</option><option value="antenna">Antena</option><option value="halo">Halo</option><option value="visor">Visor dourado</option></select></div>
-    </div>
-    <button class="primary" id="startBtn">▶  INICIAR PARTIDA</button>
-    <button class="secondary" id="howBtn">COMO JOGAR</button>
-    <p class="sub" id="howText" hidden>PC: WASD ou setas para mover, E para interagir, Q para sabotar e R para convocar reunião. Celular: use as setas na tela e os botões de ação. Chegue perto dos terminais brilhantes para resolver puzzles. O Fantasma vence se o tempo acabar ou a suspeita atingir 100%.</p>
-    <p class="notice">Este é um protótipo local. As partidas, personagens e configurações funcionam neste navegador.</p>
-   </div>
-  </div>
-  <div class="overlay" id="taskModal" hidden>
-   <div class="modal">
-    <div class="sub accent">TERMINAL DE MANUTENÇÃO</div><h1 id="puzzleTitle">Reiniciar circuito</h1>
-    <p id="puzzleDesc">Repita a sequência de luzes na ordem correta.</p>
-    <div id="puzzleBoard" class="puzzle-board"></div>
-    <div class="puzzle-note" id="puzzleNote">Escolha os símbolos na ordem indicada.</div>
-    <button class="secondary" id="closePuzzle">Voltar ao trem</button>
-   </div>
-  </div>
+<canvas id="g"></canvas>
+
+<div id="hud" hidden>
+ <div id="timer" class="glass"><div><small>Tempo restante</small><span id="clock">07:00</span></div><i></i><div><small>Jogadores</small><span id="alive">6/6</span></div></div>
+ <div id="mini" class="glass"><canvas id="mc" width="300" height="30" style="width:100%;height:100%"></canvas></div>
+ <div id="role" class="glass"><div class="h"><span class="ic" id="rI">🙂</span><span id="rN"></span></div><div class="d" id="rD"></div></div>
+ <div id="tasks" class="glass"><h4><span>Tarefas</span><span id="tc">0/5</span></h4><div class="bar"><i id="tb"></i></div><div id="tl"></div></div>
+ <div id="log"></div>
+ <div id="joy"><div id="knob"></div></div>
+ <div id="btns">
+  <button class="rb pu" id="bLock" hidden><span>🔒</span>Trancar</button><button class="rb pu" id="bSab" hidden><span>⚡</span>Sabotar</button>
+  <button class="rb" id="bScan"><span>🔍</span>Rastros</button><button class="rb rd" id="bMeet"><span>📢</span>Reunião</button>
+  <button class="rb big" id="bUse"><span>✋</span>USAR</button>
  </div>
- <div class="hud"><span><span class="kbd">W A S D</span> / <span class="kbd">↑ ↓ ← →</span> mover · <span class="kbd">E</span> interagir</span><span id="nearby">Explore os vagões para encontrar terminais.</span></div>
- <div class="mobile-controls" aria-label="Controles de movimento">
-  <button class="up" data-move="up">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="down">▼</button><button class="right" data-move="right">▶</button>
- </div>
-</section>
-<aside class="side">
- <div class="panel">
-  <h2>Seu papel</h2><div class="role" id="roleName">Ainda não definido</div>
-  <div class="sub" id="roleDesc">Inicie a partida para receber seu papel secreto.</div>
-  <div class="bar"><span id="suspicionBar"></span></div><div class="sub" id="suspicionText">Suspeita: 0%</div>
- </div>
- <div class="panel">
-  <h2>Objetivos do grupo</h2>
-  <div id="taskList"></div>
-  <div class="bar"><span id="taskBar"></span></div><div class="sub" id="taskCount">0 de 4 reparos concluídos</div>
- </div>
- <div class="panel">
-  <h2>Ações</h2>
-  <div class="actions">
-   <button id="interactBtn">◎ Interagir</button><button id="sabotageBtn">⚡ Sabotar</button>
-   <button id="reportBtn">◉ Reunião</button><button id="mapBtn">⌖ Dica de rota</button>
-  </div>
-  <p class="sub" id="actionHint">Aproxime-se de um terminal para interagir.</p>
- </div>
- <div class="panel">
-  <h2>Registro de bordo</h2><div class="feed" id="feed"></div>
- </div>
-</aside>
-</main>
+</div>
+
+<div class="scr clear" id="menu"><div class="sheet">
+ <div class="logo"><div class="tr">🚆</div><h1>ÚLTIMO TREM</h1><h2>PARA LUGAR NENHUM</h2></div>
+ <p class="sub" style="text-align:center">O mapa muda. Os sistemas falham.<br>Um dos 6 passageiros não é quem diz ser.</p>
+ <div class="lb" style="text-align:center">Dificuldade</div>
+ <div class="chips" id="dfc" style="justify-content:center"><div class="chip" data-d="e">Exploração</div><div class="chip on" data-d="n">Normal</div><div class="chip" data-d="h">Pesadelo</div></div>
+ <button class="mb pri" id="bGo">▶ NOVA PARTIDA</button>
+ <button class="mb" id="bCust">🎨 PERSONALIZAR PERSONAGEM</button>
+ <button class="mb" id="bHow">❓ COMO JOGAR</button>
+</div></div>
+
+<div class="scr" id="cust" hidden><div class="sheet glass">
+ <canvas id="pv" width="170" height="190"></canvas>
+ <div class="lb">Nome</div><input id="nm" maxlength="10" value="Viajante">
+ <div class="lb">Pele</div><div class="sw" id="swSkin"></div>
+ <div class="lb">Traje</div><div class="sw" id="swSuit"></div>
+ <div class="lb">Acessório</div><div class="chips" id="hats"></div>
+ <div class="lb">Cor do acessório</div><div class="sw" id="swHat"></div>
+ <button class="mb pri" id="bOk">✔ SALVAR</button>
+</div></div>
+
+<div class="scr" id="how" hidden><div class="sheet glass">
+ <h2 style="margin:0 0 8px;color:var(--c)">COMO JOGAR</h2>
+ <p class="sub"><b>Passageiro:</b> use o joystick para andar até os terminais brilhantes e toque em <b>USAR</b>. Cada reparo tem 2 etapas. Quando o trem sofrer uma anomalia, use <b>Rastros</b> para ver quem estava no vagão e chame uma <b>Reunião</b> para votar.</p>
+ <p class="sub"><b>Fantasma:</b> <b>Sabote</b> terminais quando houver poucas testemunhas, <b>tranque portas</b> para dividir a tripulação e finja reparos. Sobreviva às votações até o tempo acabar.</p>
+ <p class="sub">PC: WASD/setas, E usar, Q sabotar, F rastros/trancar, R reunião.</p>
+ <button class="mb pri" id="hOk">ENTENDI</button>
+</div></div>
+
+<div class="scr" id="pz" hidden><div class="sheet glass">
+ <div class="sub" style="color:var(--c)">TERMINAL DE MANUTENÇÃO</div><h2 id="pzT" style="margin:2px 0 4px"></h2><div class="sub" id="pzD"></div>
+ <div class="pzb" id="pzB"></div><div class="sub" id="pzN" style="min-height:20px"></div>
+ <button class="mb" id="pzX">Voltar ao trem</button>
+</div></div>
+<div class="scr" id="mt" hidden><div class="sheet glass" id="mtB"></div></div>
+<div class="scr" id="en" hidden><div class="sheet glass"><div class="sub" id="enS"></div><h1 id="enH" style="margin:4px 0 8px;font-size:40px"></h1><p id="enP" class="sub"></p>
+ <button class="mb pri" id="bAgain">↻ JOGAR NOVAMENTE</button><button class="mb" id="bMenu">MENU</button></div></div>
+
 <script>
 (()=>{
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-const $=id=>document.getElementById(id);
-const W=960,H=600;
-let running=false,role=null,timeLeft=480,suspicion=0,done=0,meetingUsed=false,gameOver=false,paused=false,focus=100,abilityCooldown=0,difficulty='normal',playerName='Viajante',playerColor='#58b9ff',accessory='none';
-let player={x:120,y:300,r:13,speed:2.6};
-const tasks=[
- {id:0,name:'Restaurar energia',desc:'Vagão 1 · Quadro elétrico',x:150,y:145,done:false,type:'wires'},
- {id:1,name:'Reparar as portas',desc:'Vagão 2 · Console de acesso',x:375,y:390,done:false,type:'sequence'},
- {id:2,name:'Reativar o controle',desc:'Vagão 3 · Painel central',x:600,y:155,done:false,type:'wires'},
- {id:3,name:'Ajustar o freio',desc:'Vagão 4 · Válvula de pressão',x:805,y:405,done:false,type:'sequence'}
-];
-const bots=[
- {name:'Luna',x:215,y:220,color:'#58b9ff',state:'task',task:0,alive:true},
- {name:'Bruno',x:490,y:170,color:'#ffb05c',state:'walk',task:1,alive:true},
- {name:'Rafa',x:300,y:455,color:'#72e39a',state:'task',task:1,alive:true},
- {name:'Carla',x:710,y:265,color:'#ff7e9b',state:'walk',task:2,alive:true},
- {name:'Diego',x:790,y:500,color:'#c49aff',state:'task',task:3,alive:true}
-];
-const rooms=[
- {x:30,y:80,w:205,h:180,name:'VAGÃO 01 · ENERGIA'},
- {x:245,y:80,w:190,h:440,name:'VAGÃO 02 · CABINES'},
- {x:445,y:80,w:205,h:205,name:'VAGÃO 03 · CONTROLE'},
- {x:445,y:300,w:205,h:220,name:'VAGÃO 04 · OFICINA'},
- {x:660,y:80,w:270,h:440,name:'VAGÃO 05 · FREIOS'}
-];
-let keys={},last=0,near=null,particles=[],sequence=[],seqInput=[],seqStep=0,puzzleTask=null,buttonsHeld={};
-function log(msg,cls=''){const d=document.createElement('div');d.textContent=msg; if(cls)d.className=cls;$('feed').prepend(d);while($('feed').children.length>18)$('feed').lastChild.remove();}
-function setTaskList(){ $('taskList').innerHTML='';tasks.forEach(t=>{let d=document.createElement('div');d.className='task'+(t.done?' done':'');d.innerHTML=`<span class="dot"></span><div><div class="taskname">${t.name}</div><small>${t.desc}</small></div>`;$('taskList').append(d)});$('taskCount').textContent=`${done} de ${tasks.length} reparos concluídos`;$('taskBar').style.width=(done/tasks.length*100)+'%';$('progress').textContent=Math.round(done/tasks.length*100)+'%';}
-function start(){
- running=true;paused=false;gameOver=false;difficulty=$('difficulty').value;playerName=($('playerName').value.trim()||'Viajante').slice(0,14);accessory=$('accessory').value;timeLeft=difficulty==='easy'?600:difficulty==='hard'?390:480;suspicion=0;done=0;focus=100;abilityCooldown=0;meetingUsed=false;player={x:100,y:310,r:13,speed:2.7};tasks.forEach(t=>t.done=false);
- bots.forEach((b,i)=>{b.x=[215,500,300,710,790][i];b.y=[220,170,455,265,500][i];b.state=Math.random()<.5?'task':'walk';b.task=(i+Math.floor(Math.random()*3))%tasks.length;b.alive=true;});
- role=Math.random()< (difficulty==='hard'?.38:.27)?'ghost':'passenger';
- $('roleName').textContent=role==='ghost'?'PASSAGEIRO FANTASMA':'PASSAGEIRO';$('roleName').className='role '+(role==='ghost'?'':'passenger');
- $('roleDesc').textContent=role==='ghost'?'Atrase o trem e confunda a tripulação. Sua habilidade especial reduz suspeitas, mas tem recarga.':'Complete reparos, observe comportamentos estranhos e use sua habilidade para investigar anomalias.';
- $('suspicionBar').style.width='0%';$('suspicionText').textContent='Suspeita: 0%';$('startOverlay').hidden=true;$('reportBtn').disabled=false;$('pauseBtn').textContent='Ⅱ Pausar';log(role==='ghost'?'Você é o Passageiro Fantasma. Não deixe pistas.':`Você é ${playerName}, um Passageiro. Conserte o trem e fique atento.`,'alert');log(`Dificuldade: ${{easy:'Exploração',normal:'Normal',hard:'Pesadelo'}[difficulty]}.`);log('O trem entrou em uma zona sem sinal.');setTaskList();last=performance.now();requestAnimationFrame(loop);
-}
-function end(winner,msg){gameOver=true;running=false;$('startOverlay').hidden=false;$('startOverlay').querySelector('.eyebrow').textContent='FIM DE PARTIDA';$('startOverlay').querySelector('h1').innerHTML=winner;$('startOverlay').querySelector('.menu-top .sub').textContent=msg;$('startBtn').textContent='↻ JOGAR NOVAMENTE';$('howBtn').hidden=false;}
-function draw(){
- ctx.clearRect(0,0,W,H);
- // background and rails
- ctx.fillStyle='#06101b';ctx.fillRect(0,0,W,H);
- for(let x=0;x<W;x+=32){ctx.strokeStyle='#0d2333';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
- for(let y=0;y<H;y+=32){ctx.strokeStyle='#0d2333';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
- // outside train shell
- ctx.fillStyle='#101f2b';ctx.strokeStyle='#284e65';ctx.lineWidth=4;roundRect(ctx,15,60,930,490,18,true,true);
- rooms.forEach((r,i)=>{
-  ctx.fillStyle=['#152d3a','#182b39','#142f40','#192a3a','#172d3b'][i];ctx.fillRect(r.x,r.y,r.w,r.h);
-  ctx.strokeStyle='#426078';ctx.lineWidth=2;ctx.strokeRect(r.x,r.y,r.w,r.h);
-  ctx.fillStyle='#254459';ctx.fillRect(r.x+8,r.y+8,r.w-16,23);
-  ctx.fillStyle='#a6c8dc';ctx.font='bold 11px system-ui';ctx.fillText(r.name,r.x+14,r.y+24);
-  // floor tiles
-  ctx.strokeStyle='#203c4d';ctx.lineWidth=1;for(let x=r.x+8;x<r.x+r.w;x+=28){ctx.beginPath();ctx.moveTo(x,r.y+34);ctx.lineTo(x,r.y+r.h-8);ctx.stroke()}for(let y=r.y+45;y<r.y+r.h;y+=28){ctx.beginPath();ctx.moveTo(r.x+5,y);ctx.lineTo(r.x+r.w-5,y);ctx.stroke()}
+const $=id=>document.getElementById(id),rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],shuf=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const cv=$('g'),ctx=cv.getContext('2d');
+const sh=(h,f)=>{const n=parseInt(h.slice(1),16);return`rgb(${Math.min(255,(n>>16&255)*f)|0},${Math.min(255,(n>>8&255)*f)|0},${Math.min(255,(n&255)*f)|0})`};
+const rr=(c,x,y,w,h,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h)};
+const TW=32,TH=16,ZP=30,OX=260,OY=190,OW=1700,OH=1000;
+const P=(x,y,z=0)=>[(x-y)*TW+OX,(x+y)*TH-z*ZP+OY];
+const poly=(c,pts,f,s,lw=1)=>{c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();if(f){c.fillStyle=f;c.fill()}if(s){c.strokeStyle=s;c.lineWidth=lw;c.stroke()}};
+function boxD(c,x,y,w,d,h,col,z0=0){poly(c,[P(x,y,z0+h),P(x+w,y,z0+h),P(x+w,y+d,z0+h),P(x,y+d,z0+h)],sh(col,1.2),'#0004');
+ poly(c,[P(x,y+d,z0),P(x+w,y+d,z0),P(x+w,y+d,z0+h),P(x,y+d,z0+h)],sh(col,.78),'#0004');poly(c,[P(x+w,y,z0),P(x+w,y+d,z0),P(x+w,y+d,z0+h),P(x+w,y,z0+h)],sh(col,.52),'#0004')}
+const TM=[{f:'#1d3d3b',a:'#183331',w:'#1f4f49',g:'#3dffa0',n:'Energia'},{f:'#4a3626',a:'#40301f',w:'#5c4030',g:'#ffb35c',n:'Cabines'},{f:'#1f3050',a:'#192742',w:'#24426e',g:'#4db8ff',n:'Controle'},{f:'#3d3229',a:'#342a21',w:'#50402f',g:'#ff9a3d',n:'Oficina'},{f:'#3c2531',a:'#331f29',w:'#4d2b3d',g:'#ff4d6a',n:'Freios'}];
+const FH={sofa:.5,table:.7,crate:.9,gen:1.5,vend:2,locker:1.9,plant:1.1};
+const F0=[[0,'gen',.7,.4,1.6,1],[0,'crate',6.3,.5,1,1],[0,'crate',.8,4.7,1,1],[0,'locker',5.5,4.9,.9,.7],[1,'sofa',.8,.5,2,1],[1,'plant',6.4,.6,.6,.6],[1,'table',1.2,4.7,1.4,.9],[1,'sofa',4.5,4.7,2,1],
+[2,'vend',.7,.4,1,.8],[2,'locker',6.3,.5,.9,.7],[2,'table',2,4.7,1.4,.9],[2,'plant',6.4,4.9,.6,.6],[3,'crate',.8,.5,1,1],[3,'crate',1.9,.5,1,1],[3,'gen',5.2,.4,1.6,1],[3,'locker',1,4.8,.9,.7],[3,'crate',5.6,4.8,1,1],
+[4,'gen',.7,.4,1.6,1],[4,'vend',6.2,.4,1,.8],[4,'sofa',1,4.7,2,1],[4,'plant',6.4,4.9,.6,.6]];
+const F=F0.map(([car,t,x,y,w,d])=>({car,t,x:car*8+x,y,w,d,h:FH[t]}));
+const TD=[['Restaurar a energia','wires',0,'⚡'],['Consertar as portas','seq',1,'▤'],['Reativar o controle','sw',2,'⌘'],['Pressurizar válvulas','wires',3,'◉'],['Ajustar o freio','seq',4,'✚']];
+const NEED=2,SKIN=['#ffd9b8','#f0b98d','#c98a5e','#8a5a3b','#5a3a28'],SUIT=['#2f8fff','#3ddc84','#ff5c8a','#ff9f43','#a66bff','#e8eef5','#ff4d4d','#27d3c3'],HATC=['#ff4d4d','#ffb020','#3ddc84','#3fa7ff','#b58aff','#f2f5f8'];
+const HATS=[['cap','Boné'],['beanie','Gorro'],['helmet','Capacete'],['ant','Antena'],['phones','Fones'],['halo','Halo'],['none','Nenhum']];
+let look={skin:SKIN[1],suit:SUIT[0],hat:'cap',hatc:HATC[0]};
+try{Object.assign(look,JSON.parse(localStorage.getItem('ut_look')||'{}'))}catch(e){}
+let myName='Viajante';try{myName=localStorage.getItem('ut_name')||myName}catch(e){}
+let off,dpr=1,vw=0,vh=0,Z=1,mode='menu',diff='n',T=[],B=[],player,bots=[],all=[],tl=420,clues=[],sc={},meets=2,lock=[0,0,0,0,0],cd={abl:0,sab:0,lk:0},near=null,last=0,pzT=null,mtOpen=false,paused=false,shake=0,cam={x:0,y:0},keys={},stick={x:0,y:0},now=0;
+const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.ceil(s%60)).padStart(2,'0');
+const alive=()=>all.filter(c=>c.alive);
+
+/* ---------- mundo estático (pré-renderizado) ---------- */
+function build(){off=document.createElement('canvas');off.width=OW*2;off.height=OH*2;const c=off.getContext('2d');c.scale(2,2);
+ TM.forEach((m,i)=>{const x0=i*8;
+  for(let x=0;x<8;x++)for(let y=0;y<6;y++)poly(c,[P(x0+x,y),P(x0+x+1,y),P(x0+x+1,y+1),P(x0+x,y+1)],(x+y)%2?m.a:m.f,'#0004');
+  poly(c,[P(x0+.2,2.05),P(x0+7.8,2.05),P(x0+7.8,3.95),P(x0+.2,3.95)],m.g+'14',m.g+'66',1.5);
+  poly(c,[P(x0,6),P(x0+8,6),P(x0+8,6,-.4),P(x0,6,-.4)],'#0a111b','#1b3346');poly(c,[P(x0,6,-.32),P(x0+8,6,-.32),P(x0+8,6,-.38),P(x0,6,-.38)],m.g+'88');
+  const g=c.createLinearGradient(0,P(x0,0,3.1)[1],0,P(x0,0,0)[1]);g.addColorStop(0,sh(m.w,1.15));g.addColorStop(1,sh(m.w,.6));
+  poly(c,[P(x0,0),P(x0+8,0),P(x0+8,0,3.1),P(x0,0,3.1)],g,'#000a',2);
+  poly(c,[P(x0,0),P(x0+8,0),P(x0+8,0,.8),P(x0,0,.8)],sh(m.w,.42),'#0006');poly(c,[P(x0,0,.8),P(x0+8,0,.8),P(x0+8,0,.86),P(x0,0,.86)],m.g+'aa');
+  poly(c,[P(x0,0,2.85),P(x0+8,0,2.85),P(x0+8,0,3.1),P(x0,0,3.1)],'#0c1520','#000');
+  [[.8,2.7],[5.3,7.2]].forEach(([a,b])=>{poly(c,[P(x0+a,0,1.25),P(x0+b,0,1.25),P(x0+b,0,2.55),P(x0+a,0,2.55)],'#06101c','#a9c0cf',2.5);
+   for(let k=0;k<6;k++){const s=a+(b-a)*(k+.5)/6;poly(c,[P(x0+s,0,1.3+(k%3)*.35),P(x0+s+.35,0,1.3+(k%3)*.35),P(x0+s+.35,0,1.36+(k%3)*.35),P(x0+s,0,1.36+(k%3)*.35)],'#8fd8ff'+(k%2?'55':'99'))}});
+  poly(c,[P(x0+3.2,0,1.5),P(x0+4.8,0,1.5),P(x0+4.8,0,2.6),P(x0+3.2,0,2.6)],m.g+'22',m.g+'aa',2);
+  [2.2,6].forEach(lx=>{const[X,Y]=P(x0+lx,2.4);c.save();c.globalCompositeOperation='lighter';c.translate(X,Y);c.scale(1,.5);const r=c.createRadialGradient(0,0,0,0,0,110);r.addColorStop(0,m.g+'44');r.addColorStop(1,m.g+'00');c.fillStyle=r;c.beginPath();c.arc(0,0,110,0,7);c.fill();c.restore();
+   poly(c,[P(x0+lx-.3,0,2.7),P(x0+lx+.3,0,2.7),P(x0+lx+.3,0,2.8),P(x0+lx-.3,0,2.8)],'#fff')});
  });
- // connecting doors
- [[235,270],[435,270],[650,270],[650,405]].forEach(([x,y])=>{ctx.fillStyle='#55d7ff';ctx.fillRect(x-5,y-18,10,36);ctx.fillStyle='#183c50';ctx.fillRect(x-2,y-14,4,28)});
- // furniture
- drawConsole(85,105,'⚡','#ffcf6a');drawConsole(330,330,'▤','#55d7ff');drawConsole(550,110,'⌘','#c49aff');drawConsole(740,360,'◉','#ff9b72');
- // benches, lockers, odd portal
- [[60,200,70,20],[265,150,60,20],[285,430,75,20],[470,225,65,20],[685,175,70,20],[760,455,80,20]].forEach(([x,y,w,h])=>{ctx.fillStyle='#29495b';ctx.fillRect(x,y,w,h);ctx.fillStyle='#467085';ctx.fillRect(x,y,w,4);ctx.strokeStyle='#102333';ctx.strokeRect(x,y,w,h)});
- // task points
- tasks.forEach(t=>{ctx.save();ctx.translate(t.x,t.y);ctx.fillStyle=t.done?'#4fe3a1':'#4dcfff';ctx.globalAlpha=.18;ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=t.done?'#4fe3a1':'#55d7ff';ctx.fillRect(-10,-10,20,20);ctx.strokeStyle='#07131e';ctx.lineWidth=2;ctx.strokeRect(-10,-10,20,20);ctx.fillStyle='#082034';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText(t.done?'✓':'+',0,5);ctx.restore()});
- // bots
- bots.forEach(b=>{if(!b.alive)return;drawChar(b.x,b.y,b.color,b.name,false)});
- drawChar(player.x,player.y,playerColor,playerName,true);
- // dark vignette / scanner lines
- const g=ctx.createRadialGradient(player.x,player.y,80,player.x,player.y,520);g.addColorStop(0,'#00000000');g.addColorStop(1,'#02070a88');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
- // interaction radius
- if(near){ctx.strokeStyle='#7de9ff';ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(near.x,near.y,25,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])}
-}
-function roundRect(c,x,y,w,h,r,fill,stroke){c.beginPath();c.roundRect(x,y,w,h,r);if(fill)c.fill();if(stroke)c.stroke()}
-function drawConsole(x,y,symbol,color){ctx.fillStyle='#0a1721';ctx.fillRect(x,y,35,38);ctx.fillStyle='#284b5e';ctx.fillRect(x+3,y+3,29,25);ctx.fillStyle=color;ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.fillText(symbol,x+17,y+22);ctx.fillStyle='#5b8195';ctx.fillRect(x+7,y+31,21,3)}
-function drawChar(x,y,color,name,isPlayer){
- ctx.save();ctx.translate(x,y);
- ctx.fillStyle='#02070b88';ctx.beginPath();ctx.ellipse(0,12,15,7,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-10,-12,20,26,8);ctx.fill();ctx.fillStyle=accessory==='visor'&&isPlayer?'#ffd36a':'#bcecff';ctx.beginPath();ctx.roundRect(-7,-9,14,8,4);ctx.fill();if(isPlayer&&accessory==='cap'){ctx.fillStyle='#ffcc65';ctx.fillRect(-11,-14,22,5);ctx.fillRect(-5,-18,12,5)}if(isPlayer&&accessory==='antenna'){ctx.strokeStyle='#d8f4ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(3,-21);ctx.stroke();ctx.fillStyle='#ff6d78';ctx.beginPath();ctx.arc(3,-22,3,0,Math.PI*2);ctx.fill()}if(isPlayer&&accessory==='halo'){ctx.strokeStyle='#ffe78b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-17,11,4,0,0,Math.PI*2);ctx.stroke()}ctx.fillStyle='#183245';ctx.fillRect(-6,13,5,5);ctx.fillRect(2,13,5,5);
- if(isPlayer){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,17,0,Math.PI*2);ctx.stroke()}
- ctx.fillStyle='#eaf8ff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(name,0,-20);ctx.restore();
-}
-function findNear(){let best=null,dist=Infinity;tasks.forEach(t=>{let d=Math.hypot(player.x-t.x,player.y-t.y);if(d<dist&&d<48&&!t.done){best=t;dist=d}});return best}
-function updateUI(){near=findNear();$('nearby').textContent=near?`Terminal próximo: ${near.name} · pressione E`:'Explore os vagões para encontrar terminais.';$('interactBtn').disabled=!near||!running;$('sabotageBtn').disabled=role!=='ghost'||!running;$('sabotageBtn').textContent=role==='ghost'?'⚡ Sabotar':'⚡ Sabotagem (Fantasma)';$('players').textContent=`${bots.filter(b=>b.alive).length+1} ativos`;$('suspicionBar').style.width=Math.min(100,suspicion)+'%';$('suspicionText').textContent=`Suspeita: ${Math.round(suspicion)}%`;$('focusBar').style.width=focus+'%';$('focusText').textContent=Math.round(focus)+'%';$('abilityBtn').disabled=!running||focus<30||abilityCooldown>0;$('abilityBtn').textContent=abilityCooldown>0?`✦ Recarga ${Math.ceil(abilityCooldown)}s`:'✦ Habilidade';}
-function movePlayer(dt){let dx=0,dy=0;if(keys.ArrowLeft||keys.a||buttonsHeld.left)dx--;if(keys.ArrowRight||keys.d||buttonsHeld.right)dx++;if(keys.ArrowUp||keys.w||buttonsHeld.up)dy--;if(keys.ArrowDown||keys.s||buttonsHeld.down)dy++;if(dx&&dy){dx*=.707;dy*=.707}player.x=Math.max(28,Math.min(930,player.x+dx*player.speed*dt));player.y=Math.max(80,Math.min(525,player.y+dy*player.speed*dt));}
-function botAI(dt){
- bots.forEach((b,i)=>{if(!b.alive)return;
-  if(b.state==='task'){let t=tasks[b.task];if(t&&!t.done){let d=Math.hypot(t.x-b.x,t.y-b.y);if(d>10){b.x+=(t.x-b.x)/d*0.5*dt;b.y+=(t.y-b.y)/d*0.5*dt}else if(Math.random()<.0015*dt){if(role==='ghost'&&Math.random()<.3){suspicion+=5;log(`${b.name} encontrou uma falha estranha.`, 'alert')}else{t.done=true;done++;setTaskList();log(`${b.name} concluiu: ${t.name}.`,'good')}}}else b.state='walk';
-  }else{b.x+=Math.sin(performance.now()/900+i*4)*.55*dt;b.y+=Math.cos(performance.now()/1100+i*3)*.42*dt;b.x=Math.max(45,Math.min(910,b.x));b.y=Math.max(110,Math.min(500,b.y));if(Math.random()<.004*dt){b.state='task';let pending=tasks.filter(t=>!t.done);if(pending.length)b.task=pending[Math.floor(Math.random()*pending.length)].id}}
-  if(role==='ghost'&&Math.hypot(player.x-b.x,player.y-b.y)<25&&Math.random()<.0008*dt){suspicion+=2}
- });
-}
-function loop(now){if(!running)return;let dt=Math.min(2,(now-last)/16.67||1);last=now;if(paused){draw();requestAnimationFrame(loop);return}movePlayer(dt);botAI(dt);focus=Math.min(100,focus+.035*dt);abilityCooldown=Math.max(0,abilityCooldown-dt);draw();updateUI();timeLeft-=dt/60;if(timeLeft<=0){timeLeft=0;renderClock();end(role==='ghost'?'O Fantasma venceu':'A viagem foi perdida','O tempo acabou antes que o trem pudesse partir.');return}if(done===tasks.length){end(role==='ghost'?'Você escapou da suspeita':'A tripulação venceu','Todos os sistemas foram reparados e o trem finalmente partiu.');return}if(suspicion>=100){end(role==='ghost'?'Você foi descoberto':'A anomalia foi exposta','A tripulação identificou a interferência e encerrou a viagem.');return}renderClock();requestAnimationFrame(loop)}
-function renderClock(){let s=Math.ceil(timeLeft);$('clock').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
-function interact(){if(!running)return;near=findNear();if(!near){log('Nenhum terminal ao alcance. Aproxime-se de um ícone azul.');return}openPuzzle(near)}
-function openPuzzle(t){puzzleTask=t;$('taskModal').hidden=false;$('puzzleTitle').textContent=t.name;$('puzzleDesc').textContent=t.type==='wires'?'Conecte os três módulos na ordem correta para restaurar o sistema.':'Memorize e repita a sequência de símbolos para calibrar o sistema.';const board=$('puzzleBoard');board.innerHTML='';$('puzzleNote').textContent='Escolha os símbolos na ordem indicada.';seqInput=[];sequence=t.type==='wires'?[0,1,2]:Array.from({length:3},()=>Math.floor(Math.random()*3));if(t.type==='wires'){[0,1,2].forEach((v)=>{let b=document.createElement('button');b.textContent=['⚡','◇','●'][v];b.onclick=()=>{if(seqInput.includes(v))return;seqInput.push(v);b.classList.add('selected');if(seqInput.length===3){if(seqInput.every((n,i)=>n===i))completeTask(t);else{$('puzzleNote').textContent='Conexão incorreta. Tente novamente.';setTimeout(()=>openPuzzle(t),700)}}};board.append(b)})}else{sequence=[0,2,1];$('puzzleNote').textContent='Sequência correta: ◇ → ● → ⚡';[0,1,2].forEach(v=>{let b=document.createElement('button');b.textContent=['◇','⚡','●'][v];b.onclick=()=>{seqInput.push(v);b.classList.add('selected');if(seqInput.length===3){if(seqInput.join(',')==='0,2,1')completeTask(t);else{$('puzzleNote').textContent='Sequência errada. Tente de novo.';setTimeout(()=>openPuzzle(t),700)}}};board.append(b)})}}
-function completeTask(t){if(!t.done){t.done=true;done++;setTaskList();log(`Você concluiu: ${t.name}.`,'good');if(role==='ghost'){suspicion+=10;log('Você deixou um rastro de energia instável.','alert')}}$('taskModal').hidden=true}
-function sabotage(){if(!running||role!=='ghost')return;if(focus<20){log('Foco insuficiente para sabotar. Aguarde recuperar energia.','alert');return}focus-=20;let closest=tasks.reduce((a,t)=>!a||Math.hypot(player.x-t.x,player.y-t.y)<Math.hypot(player.x-a.x,player.y-a.y)?t:a,null);if(!closest||Math.hypot(player.x-closest.x,player.y-closest.y)>90){log('Aproxime-se de um terminal para sabotar.');return}if(closest.done){closest.done=false;done--;setTaskList();suspicion+=8;log(`Falha no sistema: ${closest.name}. Você deixou um rastro!`,'alert')}else{timeLeft=Math.max(0,timeLeft-25);suspicion+=4;log(`Você atrasou o trem perto de ${closest.name}.`,'alert')} }
-function meeting(){if(!running||meetingUsed)return;meetingUsed=true;log('Reunião de emergência: todos discutem as anomalias.','alert');if(role==='ghost'){suspicion+=18;log('As perguntas da tripulação aumentaram a suspeita sobre você.','alert')}else{let suspect=bots[Math.floor(Math.random()*bots.length)];log(`${suspect.name} foi apontado como suspeito, mas não há provas suficientes.`)}$('reportBtn').disabled=true;}
-function useAbility(){if(!running||focus<30||abilityCooldown>0)return;focus-=30;abilityCooldown=12;if(role==='ghost'){suspicion=Math.max(0,suspicion-14);log('Você mascarou seu rastro por alguns instantes.','good')}else{let nearBot=bots.filter(b=>b.alive).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];if(nearBot&&Math.hypot(player.x-nearBot.x,player.y-nearBot.y)<180){log(`Você observou ${nearBot.name}: ${nearBot.state==='task'?'estava perto de um terminal':'circulava sem concluir tarefas'}.`,'alert');if(nearBot.state==='walk')suspicion=Math.min(100,suspicion+4)}else{let t=tasks.filter(t=>!t.done).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];if(t)log(`Scanner: sinal instável detectado em ${t.name}.`,'good')}}}
-function togglePause(){if(!running)return;paused=!paused;$('pauseBtn').textContent=paused?'▶ Retomar':'Ⅱ Pausar';log(paused?'Partida pausada.':'Partida retomada.')}
-function hint(){if(!running)return;let t=tasks.filter(t=>!t.done).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];if(t){log(`Dica de rota: procure ${t.name} — ${t.desc}.`);$('actionHint').textContent=`Mais próximo: ${t.name}.`}}
-document.addEventListener('keydown',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[k]=true;if(k==='e')interact();if(k==='q')sabotage();if(k==='r')meeting();if(k===' '){togglePause()}});
-document.addEventListener('keyup',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
-document.querySelectorAll('[data-move]').forEach(b=>{const dir=b.dataset.move;const on=()=>buttonsHeld[dir]=true,off=()=>buttonsHeld[dir]=false;b.addEventListener('pointerdown',e=>{e.preventDefault();on()});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off))});
-$('startBtn').onclick=start;$('howBtn').onclick=()=>{$('howText').hidden=!$('howText').hidden};$('interactBtn').onclick=interact;$('sabotageBtn').onclick=sabotage;$('reportBtn').onclick=meeting;$('mapBtn').onclick=hint;$('abilityBtn').onclick=useAbility;$('pauseBtn').onclick=togglePause;$('closePuzzle').onclick=()=>{$('taskModal').hidden=true};
-canvas.addEventListener('pointerdown',e=>{if(!running)return;let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;let t=tasks.find(t=>Math.hypot(t.x-x,t.y-y)<30);if(t&&!t.done){let d=Math.hypot(player.x-t.x,player.y-t.y);if(d<80)openPuzzle(t);else log('Chegue mais perto do terminal para interagir.')}});
-const palette=[['#58b9ff','Azul elétrico'],['#72e39a','Verde neon'],['#ff7e9b','Rosa orbital'],['#ffb05c','Âmbar'],['#c49aff','Violeta'],['#f1f5f9','Prata'],['#ff6d78','Vermelho'],['#55e0d0','Turquesa']];
-palette.forEach(([color,label],i)=>{let b=document.createElement('button');b.className='swatch'+(i===0?' active':'');b.style.background=color;b.title=label;b.setAttribute('aria-label',label);b.onclick=()=>{playerColor=color;document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));b.classList.add('active');updatePreview()};$('swatches').append(b)});
-function updatePreview(){let n=$('playerName').value.trim()||'Viajante';$('previewName').textContent=n;$('previewStyle').textContent=`Visual personalizado · ${palette.find(p=>p[0]===playerColor)?.[1]||'Azul elétrico'}`;$('avatarPreview').style.color=playerColor;$('avatarPreview').style.textShadow=`0 0 14px ${playerColor}`;$('avatarPreview').textContent=accessory==='halo'?'♧':accessory==='antenna'?'♟':accessory==='cap'?'♟':accessory==='visor'?'◉':'●'}
-$('playerName').addEventListener('input',updatePreview);$('accessory').addEventListener('change',()=>{accessory=$('accessory').value;updatePreview()});updatePreview();
-setTaskList();draw();log('Bem-vindo ao Último Trem para Lugar Nenhum.'); 
+ poly(c,[P(0,0),P(0,6),P(0,6,3.1),P(0,0,3.1)],'#0d1824','#000a',2);poly(c,[P(0,2,0),P(0,4,0),P(0,4,2.4),P(0,2,2.4)],'#08111b',TM[0].g,2);
+ poly(c,[P(40,0),P(40,6),P(40,6,-.4),P(40,0,-.4)],'#0a111b','#1b3346')}
+
+/* ---------- mobiliário e personagens ---------- */
+function drawF(f){const c=ctx,{x,y,w,d,h}=f,m=TM[f.car],pu=.5+.5*Math.sin(now*3+x);
+ if(f.t==='sofa'){const k=['#8a3e55','#2f6a8a','#7a5a2a','#4a6a3a','#7a3a8a'][f.car];boxD(c,x,y,w,d,.5,k);boxD(c,x,y,w,.3,1,k);boxD(c,x,y,.25,d,.85,k);boxD(c,x+w-.25,y,.25,d,.85,k);boxD(c,x+.3,y+.3,w-.6,d-.3,.58,sh(k,1.25).replace('rgb','rgb'))}
+ else if(f.t==='table'){boxD(c,x,y,w,d,.12,'#7a5233',.6);[[0,0],[w-.12,0],[0,d-.12],[w-.12,d-.12]].forEach(([a,b])=>boxD(c,x+a,y+b,.12,.12,.6,'#3a2a1c'));boxD(c,x+w/2-.1,y+d/2-.1,.2,.2,.3,'#d8e6f0',.72);const[X,Y]=P(x+w/2,y+d/2,1.05);c.fillStyle=m.g+'55';c.beginPath();c.arc(X,Y,10+pu*3,0,7);c.fill()}
+ else if(f.t==='crate'){boxD(c,x,y,w,d,.9,'#9a6a35');poly(c,[P(x,y+d,.45),P(x+w,y+d,.45),P(x+w,y+d,.55),P(x,y+d,.55)],'#3a2812');poly(c,[P(x+w/2-.08,y,.9),P(x+w/2+.08,y,.9),P(x+w/2+.08,y+d,.9),P(x+w/2-.08,y+d,.9)],'#3a2812')}
+ else if(f.t==='gen'){boxD(c,x,y,w,d,1.5,'#3a5066');boxD(c,x+.2,y+.2,w-.4,d-.4,.12,'#16242e',1.5);boxD(c,x+w-.45,y+.2,.28,.28,.7,'#7c8a96',1.62);
+  poly(c,[P(x+.2,y+d,.3),P(x+w-.2,y+d,.3),P(x+w-.2,y+d,1.2),P(x+.2,y+d,1.2)],m.g+(pu>.5?'cc':'66'),'#000a');for(let k=1;k<5;k++)poly(c,[P(x+.2+k*(w-.4)/5,y+d,.3),P(x+.23+k*(w-.4)/5,y+d,.3),P(x+.23+k*(w-.4)/5,y+d,1.2),P(x+.2+k*(w-.4)/5,y+d,1.2)],'#0007')}
+ else if(f.t==='vend'){boxD(c,x,y,w,d,2,'#2a468a');poly(c,[P(x+.1,y+d,.5),P(x+w-.1,y+d,.5),P(x+w-.1,y+d,1.85),P(x+.1,y+d,1.85)],'#0a1c3a','#7fd0ff');
+  for(let r=0;r<3;r++)for(let q=0;q<3;q++){const a=x+.15+q*(w-.3)/3,z=.65+r*.4;poly(c,[P(a,y+d,z),P(a+.2,y+d,z),P(a+.2,y+d,z+.25),P(a,y+d,z+.25)],['#ff5c5c','#ffd24a','#4ad2ff','#6ef08a'][(r+q+f.car)%4])}}
+ else if(f.t==='locker'){boxD(c,x,y,w,d,1.9,'#566676');poly(c,[P(x+.12,y+d,.2),P(x+w-.12,y+d,.2),P(x+w-.12,y+d,1.7),P(x+.12,y+d,1.7)],'#3c4a58','#0008');for(let k=0;k<4;k++)poly(c,[P(x+.2,y+d,1.3+k*.09),P(x+w-.2,y+d,1.3+k*.09),P(x+w-.2,y+d,1.33+k*.09),P(x+.2,y+d,1.33+k*.09)],'#0009')}
+ else if(f.t==='plant'){boxD(c,x,y,w,d,.4,'#9a5a35');const[X,Y]=P(x+w/2,y+d/2,.6);[['#2e9a4a',-8,-14,12],['#3dbb5c',7,-16,11],['#58d878',0,-26,12],['#2e9a4a',-2,-8,10]].forEach(([k,a,b,r])=>{c.fillStyle=k;c.beginPath();c.arc(X+a,Y+b,r,0,7);c.fill()})}}
+function terminal(t){const c=ctx,x=t.x-.6,y=.4,col=t.prog>=NEED?'#4fe3a1':t.sab?'#ff5a6a':'#3fd0ff',pu=.5+.5*Math.sin(now*4);
+ boxD(c,x,y,1.2,.6,1.2,'#1b2a38');poly(c,[P(x+.1,y+.6,.4),P(x+1.1,y+.6,.4),P(x+1.1,y+.6,1.1),P(x+.1,y+.6,1.1)],col+(t.sab?(pu>.5?'ff':'88'):'cc'),'#000a');
+ const[X,Y]=P(t.x,y+.6,.75);c.fillStyle='#04121c';c.font='bold 17px system-ui';c.textAlign='center';c.fillText(t.prog>=NEED?'✓':t.ico,X,Y+6);
+ const[a,b]=P(t.x,y+.3,1.8+Math.sin(now*3)*.08);c.fillStyle='#000a';c.beginPath();c.arc(a,b,11,0,7);c.fill();c.strokeStyle=col;c.lineWidth=2;c.stroke();c.fillStyle=col;c.font='bold 14px system-ui';c.fillText(t.sab?'!':t.prog>=NEED?'✓':t.prog+'/'+NEED,a,b+5);
+ if(t===near&&mode==='play'){const[e,f]=P(t.x,y+1.1);c.strokeStyle='#7de9ff';c.lineWidth=2;c.setLineDash([6,5]);c.beginPath();c.ellipse(e,f,34,17,0,0,7);c.stroke();c.setLineDash([])}}
+function divider(k,seg){const c=ctx,x=8*k-.15;
+ if(seg===0){boxD(c,x,0,.3,2,3.1,'#2a3f52');boxD(c,x,.0,.3,.2,3.1,'#44627a')}else{boxD(c,x,4,.3,2,1.1,'#2a3f52');boxD(c,x,5.8,.3,.2,1.1,'#44627a')}
+ if(seg===1){boxD(c,x,2,.3,2,.7,'#2a3f52',2.4);const l=lock[k]>0;poly(c,[P(x+.3,2.1,2.4),P(x+.3,3.9,2.4),P(x+.3,3.9,2.35),P(x+.3,2.1,2.35)],l?'#ff3355':'#3fd0ff');
+  if(l){poly(c,[P(x+.15,2,0),P(x+.15,4,0),P(x+.15,4,2.4),P(x+.15,2,2.4)],'#ff335533','#ff3355',2)}}}
+function body(c,L,o){const t=o.t,sw=o.mov?Math.sin(t*11+o.seed):0,bob=o.mov?-Math.abs(sw)*2:Math.sin(t*2+o.seed)*.5;
+ c.save();c.scale(o.face<0?-1:1,1);
+ c.fillStyle=sh(L.suit,.5);rr(c,-6,-9-sw*1.5,5,9,2);c.fill();rr(c,1,-9+sw*1.5,5,9,2);c.fill();c.fillStyle='#14182a';rr(c,-7,-3-sw*1.5,7,3.5,1.8);c.fill();rr(c,0,-3+sw*1.5,7,3.5,1.8);c.fill();
+ c.translate(0,bob);
+ c.fillStyle=L.skin;c.beginPath();c.arc(-10,-13+sw*2,2.8,0,7);c.arc(10,-13-sw*2,2.8,0,7);c.fill();
+ c.fillStyle=sh(L.suit,.8);rr(c,-12,-22,4.5,10+sw*2,2.2);c.fill();rr(c,7.5,-22,4.5,10-sw*2,2.2);c.fill();
+ const g=c.createLinearGradient(0,-24,0,-8);g.addColorStop(0,sh(L.suit,1.15));g.addColorStop(1,sh(L.suit,.7));c.fillStyle=g;rr(c,-8,-24,16,17,5.5);c.fill();
+ c.fillStyle='#fff6';c.fillRect(-8,-15,16,2.2);c.fillStyle='#fff9';c.beginPath();c.arc(3,-19.5,1.8,0,7);c.fill();
+ c.fillStyle=L.skin;c.beginPath();c.arc(-10.5,-31,2.6,0,7);c.arc(10.5,-31,2.6,0,7);c.fill();c.beginPath();c.arc(0,-31,10.5,0,7);c.fill();
+ const H=L.hatc,hat=L.hat;
+ if(hat==='none'||hat==='ant'||hat==='halo'||hat==='phones'){c.fillStyle='#2b2230';c.beginPath();c.arc(0,-33,10.8,Math.PI*1.02,Math.PI*1.98);c.quadraticCurveTo(4,-37,-10.6,-32);c.fill()}
+ c.fillStyle='#fff';c.beginPath();c.ellipse(-3.8,-30.5,2.6,3.1,0,0,7);c.ellipse(3.8,-30.5,2.6,3.1,0,0,7);c.fill();c.fillStyle='#1a1d2e';c.beginPath();c.arc(-3.2,-30.2,1.7,0,7);c.arc(4.4,-30.2,1.7,0,7);c.fill();c.fillStyle='#ff8a8a66';c.beginPath();c.arc(-6.5,-26.5,2,0,7);c.arc(6.5,-26.5,2,0,7);c.fill();c.strokeStyle='#6a3a2a';c.lineWidth=1;c.beginPath();c.arc(0.6,-26,2,.2,2.9);c.stroke();
+ if(hat==='cap'){c.fillStyle=H;c.beginPath();c.arc(0,-34,10.8,Math.PI,0);c.fill();c.fillStyle=sh(H,.7);rr(c,1,-35,13,3.4,1.7);c.fill()}
+ if(hat==='beanie'){c.fillStyle=H;c.beginPath();c.arc(0,-34,10.8,Math.PI,0);c.fill();c.fillStyle=sh(H,.7);rr(c,-11,-36,22,4.5,2);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(0,-45.5,3.2,0,7);c.fill()}
+ if(hat==='helmet'){c.fillStyle=H;c.beginPath();c.arc(0,-34,11.6,Math.PI,0);c.fill();c.fillStyle=sh(H,.7);rr(c,-13,-36,26,3.6,1.8);c.fill();c.fillStyle='#fff8';rr(c,-1.5,-45,3,9,1.5);c.fill()}
+ if(hat==='ant'){c.strokeStyle='#cfe8f5';c.lineWidth=1.8;c.beginPath();c.moveTo(0,-41);c.lineTo(3,-51);c.stroke();c.fillStyle=Math.sin(t*6)>0?H:'#fff';c.beginPath();c.arc(3,-52,3.2,0,7);c.fill()}
+ if(hat==='phones'){c.strokeStyle=H;c.lineWidth=2.6;c.beginPath();c.arc(0,-32,11.5,Math.PI*1.05,Math.PI*1.95);c.stroke();c.fillStyle=H;rr(c,-14,-35,5,9,2.4);c.fill();rr(c,9,-35,5,9,2.4);c.fill()}
+ if(hat==='halo'){c.strokeStyle=H;c.lineWidth=2.4;c.shadowColor=H;c.shadowBlur=8;c.beginPath();c.ellipse(0,-44.5+Math.sin(t*3)*1,9,3.2,0,0,7);c.stroke();c.shadowBlur=0}
+ c.restore()}
+function drawChar(c){const[X,Y]=P(c.x,c.y);ctx.save();ctx.translate(X,Y);
+ ctx.fillStyle='#0009';ctx.beginPath();ctx.ellipse(0,1,11,5,0,0,7);ctx.fill();
+ if(c.human){ctx.strokeStyle=c.ghost?'#b58aff':'#3fd0ff';ctx.lineWidth=2;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.ellipse(0,1,16,8,0,0,7);ctx.stroke();ctx.shadowBlur=0}
+ body(ctx,c.look,{t:now,mov:c.mov,face:c.face,seed:c.seed});
+ const w=ctx.measureText?c.name.length*6.4+12:50;ctx.fillStyle='#000a';rr(ctx,-w/2,-62,w,15,7);ctx.fill();ctx.fillStyle=c.human?'#9ff0ff':'#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(c.name,0,-51);
+ if(c.st==='work'&&mode==='play'){ctx.fillStyle='#fff';rr(ctx,10,-66,26,16,7);ctx.fill();ctx.fillStyle='#223';ctx.beginPath();for(let k=0;k<3;k++){ctx.moveTo(17+k*7+2,-58);ctx.arc(17+k*7,-58,2,0,7)}ctx.fill()}
+ ctx.restore()}
+
+/* ---------- colisão e bots ---------- */
+function blockers(){B=F.map(f=>({x:f.x,y:f.y,w:f.w,d:f.d}));T.forEach(t=>B.push({x:t.x-.6,y:.4,w:1.2,d:.6}))}
+const free=(x,y)=>{if(x<.4||x>39.6||y<.4||y>5.6)return false;for(let k=1;k<5;k++)if(Math.abs(x-8*k)<.4&&!(y>2&&y<4&&lock[k]<=0))return false;return !B.some(r=>x>r.x-.25&&x<r.x+r.w+.25&&y>r.y-.25&&y<r.y+r.d+.25)};
+const move=(o,dx,dy)=>{if(free(o.x+dx,o.y))o.x+=dx;if(free(o.x,o.y+dy))o.y+=dy;if(Math.abs(dx)>.0005)o.face=dx>0?1:-1};
+function go(b,tx,ty,dt,sp){const cc=Math.min(4,Math.floor(b.x/8));if(cc!==b.car){b.car=cc;b.cross=false}
+ const tr=Math.min(4,Math.floor(tx/8));let wx=tx,wy=ty;
+ if(tr!==b.car){const d=tr>b.car?1:-1,dk=8*(d>0?b.car+1:b.car);if(!b.cross&&(Math.abs(b.x-(dk-d*1.3))>.3||Math.abs(b.y-3)>.3)){wx=dk-d*1.3;wy=3}else{b.cross=true;wx=dk+d*1.3;wy=3}}
+ const dx=wx-b.x,dy=wy-b.y,L=Math.hypot(dx,dy);b.mov=L>.1;if(L>.05)move(b,dx/L*sp*dt,dy/L*sp*dt);return Math.hypot(tx-b.x,ty-b.y)}
+function bot(b,dt){b.t-=dt;b.sab-=dt;const play=mode==='play';
+ if(b.st==='idle'){if(b.t<=0){const pend=T.filter(t=>t.prog<NEED);b.tk=play&&b.ghost&&b.sab<=0?pick(T.filter(t=>t.prog>0).concat(T)):play&&pend.length?pick(pend):pick(T);b.st='go'}else b.mov=false}
+ else if(b.st==='go'){if(play&&!b.ghost&&b.tk.prog>=NEED){b.st='idle';b.t=0;return}if(go(b,b.tk.x,1.8,dt,play?2.1:1.6)<.35){b.st='work';b.mov=false;b.t=b.ghost?4:({e:9,n:12,h:15})[diff]+rnd(8)}}
+ else if(b.t<=0){if(play){if(b.ghost){if(b.sab<=0){sabotageAt(b,b.tk);b.sab=({e:34,n:26,h:18})[diff]+rnd(10)}}
+  else if(b.tk.prog<NEED){b.tk.prog++;if(b.tk.prog>=NEED)b.tk.sab=false;setTL();if(b.car===player.car)log(`${b.name} avançou: ${b.tk.n} (${b.tk.prog}/${NEED}).`,'g')}}
+  b.st='idle';b.t=1.5+rnd(3)}else b.mov=false}
+
+/* ---------- pistas e sabotagem ---------- */
+function sabotageAt(a,t){if(t.prog>0){t.prog=Math.max(0,t.prog-NEED);t.sab=true}else tl=Math.max(5,tl-15);
+ const who=alive().filter(c=>c.car===t.car).map(c=>c.name);clues.push({room:TM[t.car].n,time:mm(tl),who,scan:false});who.forEach(n=>sc[n]++);
+ alive().forEach(c=>{if(c===a||c.ghost||c.car!==t.car)return;if(!c.human&&Math.abs(c.x-t.x)<5)sc[a.name]+=3;if(c.human)log(`Você viu ${a.name} mexendo no terminal de ${t.n}!`,'a')});
+ log(`⚠ Anomalia no vagão ${t.car+1} (${TM[t.car].n}). Reparo desfeito!`,'a');shake=.5;setTL()}
+function lockDoor(k,sec=9){lock[k]=sec}
+
+/* ---------- jogo ---------- */
+function mkChar(name,L,human,x,y){return{name,look:L,human,x,y,car:Math.floor(x/8),alive:true,ghost:false,face:1,mov:false,seed:Math.random()*9,st:'idle',t:1+rnd(3),sab:18+rnd(10),tk:null}}
+function initWorld(){T=TD.map(([n,type,car,ico])=>({n,type,car,ico,x:car*8+4,prog:0,sab:false}));blockers();
+ const names=[['Luna',{skin:SKIN[0],suit:'#3d7fe0',hat:'beanie',hatc:'#f2f5f8'}],['Bruno',{skin:SKIN[2],suit:'#e8872b',hat:'helmet',hatc:'#ff9f1c'}],['Rafa',{skin:SKIN[1],suit:'#2fa05a',hat:'cap',hatc:'#3ddc84'}],['Carla',{skin:SKIN[3],suit:'#c8344a',hat:'phones',hatc:'#f2f5f8'}],['Diego',{skin:SKIN[0],suit:'#7a4ad8',hat:'ant',hatc:'#ff4d4d'}]];
+ player=mkChar(myName,look,true,4,3);bots=names.map(([n,l],i)=>mkChar(n,l,false,i*8+3+rnd(3),2.5+rnd(2)));all=[player,...bots];lock=[0,0,0,0,0];clues=[];sc={};all.forEach(c=>sc[c.name]=0);cd={abl:0,sab:0,lk:0};setTL()}
+function start(){diff=document.querySelector('#dfc .on').dataset.d;initWorld();const g=rnd(6);all[g].ghost=true;meets=2;tl=({e:540,n:420,h:330})[diff];
+ player.x=2;player.y=3;mode='play';paused=false;['menu','cust','how','pz','mt','en'].forEach(i=>$(i).hidden=true);$('hud').hidden=false;$('log').innerHTML='';
+ const gh=player.ghost;$('role').className='glass'+(gh?' gh':'');$('rI').textContent=gh?'👻':'🙂';$('rN').textContent=gh?'PASSAGEIRO FANTASMA':'PASSAGEIRO';
+ $('rD').innerHTML=gh?'Você altera a realidade sem ser descoberto. <b>Sabotar</b> desfaz reparos; <b>Trancar</b> bloqueia uma porta. Cuidado com testemunhas e votações!':'Conserte os 5 sistemas antes do tempo acabar. Use <b>Rastros</b> para investigar anomalias e <b>Reunião</b> para votar no Fantasma.';
+ $('role').classList.add('open');setTimeout(()=>$('role').classList.remove('open'),5000);
+ ['bSab','bLock'].forEach(i=>$(i).hidden=!gh);$('bScan').hidden=gh;
+ log(gh?'Você é o Fantasma. Não deixe testemunhas.':'Um dos cinco é o Fantasma. Fique atento!','a');setTL()}
+function setTL(){const d=T.reduce((a,t)=>a+t.prog,0),n=T.length*NEED,dn=T.filter(t=>t.prog>=NEED).length;
+ $('tl').innerHTML=T.map(t=>`<div class="tk ${t.prog>=NEED?'d':''} ${t.sab?'s':''}"><span class="o"></span><b>${t.n}<br><span class="sub" style="font-size:11px">Vagão ${t.car+1} · ${t.prog}/${NEED}</span></b></div>`).join('');
+ $('tc').textContent=dn+'/'+T.length;$('tb').style.width=d/n*100+'%'}
+function log(m,c=''){const d=document.createElement('div');d.textContent=m;d.className=c;$('log').append(d);while($('log').children.length>4)$('log').firstChild.remove();setTimeout(()=>d.remove(),7000)}
+
+function update(dt){
+ if(mode==='play'&&!paused&&!mtOpen){tl-=dt;cd.abl=Math.max(0,cd.abl-dt);cd.sab=Math.max(0,cd.sab-dt);lock=lock.map(v=>Math.max(0,v-dt));shake=Math.max(0,shake-dt);
+  if($('pz').hidden){let sx=stick.x,sy=stick.y;if(keys.ArrowLeft||keys.a)sx-=1;if(keys.ArrowRight||keys.d)sx+=1;if(keys.ArrowUp||keys.w)sy-=1;if(keys.ArrowDown||keys.s)sy+=1;
+   const m=Math.min(1,Math.hypot(sx,sy));if(m>.08){const wx=sx/TW+sy/TH,wy=sy/TH-sx/TW,L=Math.hypot(wx,wy);move(player,wx/L*3.4*m*dt,wy/L*3.4*m*dt);player.mov=true}else player.mov=false;
+   if(Math.abs(sx)>.1)player.face=sx>0?1:-1;player.car=Math.min(4,Math.floor(player.x/8))}else player.mov=false;
+  near=T.filter(t=>Math.hypot(player.x-t.x,player.y-1.7)<1.7).sort((a,b)=>a.prog-b.prog)[0]||null;
+  if(T.every(t=>t.prog>=NEED))return finish(true,'Todos os sistemas foram reparados e o trem partiu.');
+  if(tl<=0){tl=0;return finish(false,'O tempo acabou. O trem chegou a uma estação da qual ninguém consegue sair.')}}
+ if(!mtOpen&&!paused)bots.forEach(b=>b.alive&&bot(b,dt))}
+function ui(){$('clock').textContent=mm(tl);$('alive').textContent=alive().length+'/6';
+ const can=mode==='play'&&$('pz').hidden&&!mtOpen;$('bUse').disabled=!can||!near||(near.prog>=NEED&&!player.ghost);
+ const nl=[1,2,3,4].find(k=>Math.hypot(player.x-8*k,player.y-3)<2.8);
+ $('bSab').disabled=!can||cd.sab>0||!near;$('bLock').disabled=!can||cd.abl>0||!nl;$('bScan').disabled=!can||cd.abl>0;$('bMeet').disabled=!can||meets<=0;
+ $('bSab').lastChild.textContent=cd.sab>0?Math.ceil(cd.sab)+'s':'Sabotar';$('bLock').lastChild.textContent=cd.abl>0?Math.ceil(cd.abl)+'s':'Trancar';$('bScan').lastChild.textContent=cd.abl>0?Math.ceil(cd.abl)+'s':'Rastros';$('bMeet').lastChild.textContent=`Reunião (${meets})`}
+function mini(){const c=$('mc').getContext('2d'),w=300;c.clearRect(0,0,w,30);TM.forEach((m,i)=>{const x=6+i*58;c.fillStyle=player&&player.car===i&&mode==='play'?m.g+'55':'#10263a';rr(c,x,5,54,20,6);c.fill();c.strokeStyle=m.g;c.lineWidth=player&&player.car===i?2:1;c.stroke();
+  const t=T[i];if(t){c.fillStyle=t.prog>=NEED?'#4fe3a1':t.sab?'#ff5a6a':'#3fd0ff';c.beginPath();c.arc(x+14,15,4,0,7);c.fill()}if(lock[i]>0){c.fillStyle='#ff3355';c.fillRect(x-2,8,3,14)}
+  if(player&&player.car===i&&mode==='play'){c.fillStyle='#fff';c.beginPath();c.arc(x+(player.x-i*8)/8*54,15,3.5,0,7);c.fill()}})}
+
+/* ---------- ações ---------- */
+function interact(){if(mode!=='play'||!$('pz').hidden||mtOpen||!near)return;if(near.prog>=NEED&&!player.ghost)return;openPz(near)}
+function sabotage(){if(mode!=='play'||!player.ghost||cd.sab>0||!near||!$('pz').hidden||mtOpen)return;sabotageAt(player,near);cd.sab=({e:12,n:16,h:20})[diff]}
+function ability(){if(mode!=='play'||cd.abl>0||!$('pz').hidden||mtOpen)return;
+ if(player.ghost){const k=[1,2,3,4].find(k=>Math.hypot(player.x-8*k,player.y-3)<2.8);if(!k)return;lockDoor(k);cd.abl=22;log('Você trancou a porta por 9 segundos.','a')}
+ else{const c=clues[clues.length-1];if(!c){log('Nenhuma anomalia para analisar ainda.');return}c.scan=true;cd.abl=20;log(`Rastros em ${c.room}: ${c.who.join(', ')}.`,'g')}}
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(k.startsWith('Arrow'))e.preventDefault();keys[k]=true;if(k==='e')interact();if(k==='q')sabotage();if(k==='f')ability();if(k==='r')meeting();if(k==='Escape')$('pz').hidden=true});
+addEventListener('keyup',e=>keys[e.key.length===1?e.key.toLowerCase():e.key]=false);
+const joy=$('joy'),kn=$('knob');let jid=null;
+function jm(e){const r=joy.getBoundingClientRect();let dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;const m=Math.hypot(dx,dy),R=52;if(m>R){dx*=R/m;dy*=R/m}stick.x=dx/R;stick.y=dy/R;kn.style.transform=`translate(${dx}px,${dy}px)`}
+joy.onpointerdown=e=>{e.preventDefault();jid=e.pointerId;joy.setPointerCapture(jid);jm(e)};joy.onpointermove=e=>{if(e.pointerId===jid)jm(e)};
+joy.onpointerup=joy.onpointercancel=e=>{if(e.pointerId===jid){jid=null;stick.x=stick.y=0;kn.style.transform=''}};
+$('bUse').onclick=interact;$('bSab').onclick=sabotage;$('bLock').onclick=ability;$('bScan').onclick=ability;$('bMeet').onclick=meeting;
+$('role').onclick=()=>$('role').classList.toggle('open');$('tasks').onclick=()=>$('tasks').classList.toggle('open');
+
+/* ---------- puzzles ---------- */
+const COL=['#ff6d78','#ffd36a','#6ef0b0','#55d7ff'],mk=c=>{const e=document.createElement('button');e.textContent='●';e.style.color=c;e.style.background=c+'33';e.style.borderColor=c;return e},note=s=>$('pzN').textContent=s;
+function openPz(t){pzT=t;$('pz').hidden=false;$('pzT').textContent=t.n;const b=$('pzB');b.innerHTML='';b.style.gridTemplateColumns='';note('');
+ $('pzD').textContent=({wires:'Ligue cada fio ao fio da mesma cor.',seq:'Observe a sequência de luzes e repita.',sw:'Acenda todos os botões. Cada toque muda os vizinhos.'})[t.type]+` (Etapa ${t.prog+1}/${NEED})`;({wires:pWires,seq:pSeq,sw:pSw})[t.type](b,solved)}
+function solved(){const t=pzT;$('pz').hidden=true;stick.x=stick.y=0;if(player.ghost)log('Você fingiu um reparo. Ninguém desconfia.','g');else if(t.prog<NEED){t.prog++;if(t.prog>=NEED)t.sab=false;setTL();log(`Você avançou: ${t.n} (${t.prog}/${NEED}).`,'g')}}
+function pWires(b,ok){const P2=shuf([0,1,2,3]);let sel=-1,n=0;b.style.gridTemplateColumns='1fr 1fr';const L=[],R=[];
+ COL.forEach((c,i)=>{const e=mk(c);e.onclick=()=>{if(e.disabled)return;sel=i;L.forEach(x=>x.style.outline='');e.style.outline='3px solid #fff'};L.push(e)});
+ P2.forEach(i=>{const e=mk(COL[i]);e.onclick=()=>{if(sel<0||e.disabled)return;if(sel===i){e.disabled=L[i].disabled=true;L[i].style.outline='';sel=-1;if(++n===4)ok()}else{note('Fio errado.');sel=-1;L.forEach(x=>x.style.outline='')}};R.push(e)});for(let k=0;k<4;k++)b.append(L[k],R[k])}
+function pSeq(b,ok){const q=Array.from({length:4},()=>rnd(4)),p=[];let inp=[],lk=true;b.style.gridTemplateColumns='1fr 1fr';
+ const fl=i=>{p[i].style.opacity=1;p[i].style.filter='brightness(2)';setTimeout(()=>{p[i].style.opacity=.45;p[i].style.filter=''},350)};
+ const play=()=>{lk=true;note('Observe...');q.forEach((v,k)=>setTimeout(()=>fl(v),500+k*650));setTimeout(()=>{lk=false;note('Sua vez!')},500+4*650)};
+ COL.forEach((c,i)=>{const e=mk(c);e.style.opacity=.45;p.push(e);e.onclick=()=>{if(lk)return;fl(i);inp.push(i);const k=inp.length-1;if(inp[k]!==q[k]){note('Errou! Observe de novo.');inp=[];play()}else if(inp.length===4)ok()};b.append(e)});play()}
+function pSw(b,ok){const s=Array(9).fill(1);b.style.gridTemplateColumns='repeat(3,1fr)';const tg=i=>{const x=i%3,y=(i/3)|0;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,c])=>{const X=x+a,Y=y+c;if(X>=0&&X<3&&Y>=0&&Y<3)s[Y*3+X]^=1})};
+ for(let k=0;k<5;k++)tg(rnd(9));if(s.every(v=>v))tg(4);const E=[],r=()=>E.forEach((e,i)=>e.style.opacity=s[i]?1:.2);
+ s.forEach((_,i)=>{const e=mk('#55d7ff');e.onclick=()=>{tg(i);r();if(s.every(v=>v))ok()};E.push(e);b.append(e)});r()}
+$('pzX').onclick=()=>$('pz').hidden=true;
+
+/* ---------- reunião ---------- */
+function meeting(){if(mode!=='play'||meets<=0||mtOpen||!$('pz').hidden)return;meets--;mtOpen=true;stick.x=stick.y=0;
+ const cl=clues.map(c=>`<div class="clue"><b>${c.time}</b> · Anomalia em ${c.room}<br><span class="sub">${c.scan?'Rastros: '+c.who.join(', '):'Rastros não analisados'}</span></div>`).join('')||'<p class="sub">Nenhuma anomalia registrada ainda.</p>';
+ $('mtB').innerHTML=`<div class="sub" style="color:var(--c)">REUNIÃO DE EMERGÊNCIA</div><h2 style="margin:2px 0 6px">Quem é o Fantasma?</h2>${cl}<div class="vote">${alive().filter(c=>!c.human).map(c=>`<button data-v="${c.name}">Votar em ${c.name}</button>`).join('')}<button data-v="">Pular votação</button></div>`;
+ $('mt').hidden=false;$('mtB').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>tally(b.dataset.v))}
+function botVote(c){const o=alive().filter(x=>x!==c);if(c.ghost){const p=o.filter(x=>!x.ghost).sort((a,b)=>(sc[b.name]+Math.random()*2)-(sc[a.name]+Math.random()*2));return Math.random()<.65?p[0].name:pick(p).name}
+ const s=o.sort((a,b)=>(sc[b.name]+Math.random())-(sc[a.name]+Math.random()));return sc[s[0].name]>=2?s[0].name:''}
+function tally(pk){const v={};alive().forEach(c=>{const x=c.human?pk:botVote(c);if(x)v[x]=(v[x]||0)+1});const e=Object.entries(v).sort((a,b)=>b[1]-a[1]);
+ let out='Empate ou votos insuficientes. Ninguém foi expulso.',after=null;
+ if(e.length&&e[0][1]>=2&&(!e[1]||e[1][1]<e[0][1])){const x=all.find(c=>c.name===e[0][0]);x.alive=false;out=`${x.name} foi expulso do trem. ${x.ghost?'Era o Fantasma!':'Era inocente...'}`;if(x.ghost)after=true;else if(x.human||alive().length<=2)after=false}
+ $('mtB').innerHTML=`<h2 style="margin:0 0 8px">Resultado</h2><p class="sub">${e.map(([n,k])=>`${n}: ${k}`).join(' · ')||'Ninguém votou.'}</p><p><b>${out}</b></p><button class="mb pri" id="mtOk">Continuar</button>`;
+ $('mtOk').onclick=()=>{$('mt').hidden=true;mtOpen=false;sc={};all.forEach(c=>sc[c.name]=0);clues=[];if(after===true)finish(true,'O Fantasma foi expulso do trem!');else if(after===false)finish(false,'O Fantasma sobreviveu e dominou o trem.')}}
+function finish(crew,msg){mode='end';const win=crew!==player.ghost,g=all.find(c=>c.ghost);$('pz').hidden=true;$('mt').hidden=true;mtOpen=false;$('hud').hidden=true;
+ $('enS').textContent=crew?'A TRIPULAÇÃO VENCEU':'O FANTASMA VENCEU';$('enH').textContent=win?'Vitória!':'Derrota';$('enH').style.color=win?'#6ef0b0':'#ff6d78';$('enP').textContent=`${msg} O Fantasma era ${g.name}${g.human?' (você)':''}.`;$('en').hidden=false}
+
+/* ---------- menus e personalização ---------- */
+const show=id=>{['menu','cust','how'].forEach(i=>$(i).hidden=i!==id)};
+document.querySelectorAll('#dfc .chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#dfc .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on')});
+$('bGo').onclick=start;$('bAgain').onclick=start;$('bMenu').onclick=()=>{$('en').hidden=true;mode='menu';initWorld();show('menu')};
+$('bCust').onclick=()=>{$('nm').value=myName;show('cust')};$('bHow').onclick=()=>show('how');$('hOk').onclick=()=>show('menu');
+$('bOk').onclick=()=>{myName=($('nm').value.trim()||'Viajante').slice(0,10);try{localStorage.setItem('ut_look',JSON.stringify(look));localStorage.setItem('ut_name',myName)}catch(e){}player.name=myName;show('menu')};
+function sw(id,arr,key){const el=$(id);el.innerHTML='';arr.forEach(c=>{const b=document.createElement('b');b.style.background=c;if(look[key]===c)b.className='on';b.onclick=()=>{look[key]=c;[...el.children].forEach(x=>x.className='');b.className='on'};el.append(b)})}
+sw('swSkin',SKIN,'skin');sw('swSuit',SUIT,'suit');sw('swHat',HATC,'hatc');
+HATS.forEach(([k,n])=>{const c=document.createElement('div');c.className='chip'+(look.hat===k?' on':'');c.textContent=n;c.onclick=()=>{look.hat=k;[...$('hats').children].forEach(x=>x.classList.remove('on'));c.classList.add('on')};$('hats').append(c)});
+$('nm').value=myName;
+function preview(){if($('cust').hidden)return;const c=$('pv').getContext('2d');c.clearRect(0,0,170,190);c.save();c.translate(85,150);c.fillStyle='#0008';c.beginPath();c.ellipse(0,2,34,12,0,0,7);c.fill();c.scale(3.1,3.1);body(c,look,{t:now,mov:false,face:1,seed:1});c.restore();c.fillStyle='#fff';c.font='bold 14px system-ui';c.textAlign='center';c.fillText($('nm').value||'Viajante',85,184)}
+
+/* ---------- desenho ---------- */
+function resize(){dpr=Math.min(2,devicePixelRatio||1);vw=innerWidth;vh=innerHeight;cv.width=vw*dpr;cv.height=vh*dpr;Z=Math.max(.95,Math.min(1.7,vw/330))}
+addEventListener('resize',resize);
+function draw(){ctx.setTransform(1,0,0,1,0,0);const bg=ctx.createLinearGradient(0,0,0,cv.height);bg.addColorStop(0,'#070d18');bg.addColorStop(1,'#0b1626');ctx.fillStyle=bg;ctx.fillRect(0,0,cv.width,cv.height);
+ ctx.strokeStyle='#2a5a7a33';ctx.lineWidth=2*dpr;for(let k=0;k<14;k++){const x=((k*150-now*260)%(vw+300)+vw+300)%(vw+300)-150;ctx.beginPath();ctx.moveTo(x*dpr,0);ctx.lineTo((x-vh*1.9)*dpr,vh*dpr);ctx.stroke()}
+ const p=player&&mode!=='menu'?P(player.x,player.y):P(menuX,3.2);cam.x+=(p[0]-vw/(2*Z)-cam.x)*.12;cam.y+=(p[1]-vh*.4/Z-cam.y)*.12;
+ const sk=shake>0?(Math.random()-.5)*6:0;ctx.setTransform(dpr*Z,0,0,dpr*Z,(-cam.x+sk)*dpr*Z,(-cam.y+sk)*dpr*Z);
+ ctx.drawImage(off,0,0,OW,OH);
+ const it=[];F.forEach(f=>it.push([f.x+f.w+f.y+f.d,()=>drawF(f)]));T.forEach(t=>it.push([t.x+.6+1,()=>terminal(t)]));
+ for(let k=1;k<5;k++){it.push([8*k+2.3,()=>divider(k,0)]);it.push([8*k+6.3,()=>divider(k,1)])}
+ all.forEach(c=>{if(c.alive&&(c!==player||mode!=='menu'))it.push([c.x+c.y+.4,()=>drawChar(c)])});it.sort((a,b)=>a[0]-b[0]);it.forEach(i=>i[1]());
+ ctx.globalCompositeOperation='lighter';T.forEach(t=>{const[X,Y]=P(t.x,1.2,.8),r=ctx.createRadialGradient(X,Y,0,X,Y,70),c=t.sab?'#ff3050':t.prog>=NEED?'#30ffa0':'#30c8ff';r.addColorStop(0,c+'40');r.addColorStop(1,c+'00');ctx.fillStyle=r;ctx.fillRect(X-70,Y-70,140,140)});ctx.globalCompositeOperation='source-over';
+ ctx.setTransform(1,0,0,1,0,0);const sx=(p[0]-cam.x)*Z*dpr,sy=(p[1]-cam.y)*Z*dpr,v=ctx.createRadialGradient(sx,sy,150*Z*dpr,sx,sy,Math.max(cv.width,cv.height)*.75);v.addColorStop(0,'#02050c00');v.addColorStop(1,'#02050ccc');ctx.fillStyle=v;ctx.fillRect(0,0,cv.width,cv.height)}
+let menuX=4;
+function loop(ts){requestAnimationFrame(loop);const dt=Math.min(.05,(ts-last)/1000||0);last=ts;now=ts/1000;if(mode==='menu'){menuX=20+Math.sin(now*.12)*16}
+ update(dt);if(mode==='play'){ui();mini()}draw();preview()}
+resize();build();initWorld();player.alive=false;all=bots.slice();bots.forEach(b=>{b.alive=true});requestAnimationFrame(loop);
 })();
 </script>
 </body>
