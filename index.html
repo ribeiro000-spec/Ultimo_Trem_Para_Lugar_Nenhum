@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Último Trem para Lugar Nenhum — Protótipo</title>
+<style>
+:root{--bg:#07111d;--panel:#0b1c2b;--line:#23506c;--cyan:#55d7ff;--text:#e8f5ff;--muted:#91abc0;--purple:#b58aff;--red:#ff6d78;--green:#6ef0b0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#14334b 0,#07111d 58%);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;background:#102b40;border:1px solid #2a5d7a;border-radius:10px;padding:10px 13px;cursor:pointer;transition:.15s}button:hover{background:#17415d;border-color:var(--cyan)}button:disabled{opacity:.35;cursor:not-allowed}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid #17374d;background:#06101bd9;position:sticky;top:0;z-index:5;backdrop-filter:blur(10px)}
+.logo{font-weight:900;letter-spacing:.08em;font-size:clamp(16px,3vw,25px);line-height:1.05}.logo span{display:block;color:var(--cyan);font-size:.62em;letter-spacing:.22em;margin-top:5px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{border:1px solid var(--line);border-radius:10px;padding:7px 12px;background:#0b1d2b;min-width:90px}.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.stat strong{font-size:18px}
+main{max-width:1400px;margin:auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}.stage{min-width:0}.canvas-wrap{position:relative;border:1px solid #24506a;border-radius:16px;overflow:hidden;background:#07121e;box-shadow:0 20px 60px #0007}canvas{display:block;width:100%;height:auto;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:#030a12c9;backdrop-filter:blur(5px);z-index:2}.modal{width:min(480px,100%);padding:24px;border:1px solid #36708e;background:linear-gradient(145deg,#102a3d,#081522);border-radius:18px;box-shadow:0 15px 60px #0008}.modal h1{font-size:clamp(25px,5vw,38px);line-height:1.05;margin:0 0 12px}.modal p{color:#bfd2e2}.modal .accent{color:var(--cyan)}.modal .primary{width:100%;background:linear-gradient(90deg,#087eae,#1769a1);border:0;font-weight:800;padding:13px;margin-top:10px}.modal .secondary{width:100%;margin-top:8px}
+.side{display:flex;flex-direction:column;gap:12px}.panel{border:1px solid var(--line);background:linear-gradient(150deg,#0d2131,#081521);border-radius:14px;padding:15px;min-width:0}.panel h2{margin:0 0 10px;font-size:14px;color:var(--cyan);text-transform:uppercase;letter-spacing:.12em}.role{font-size:20px;font-weight:900;color:var(--purple);margin-bottom:5px}.role.passenger{color:var(--green)}.sub{color:var(--muted);font-size:13px}.task{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #17354a}.task:last-child{border:0}.dot{width:18px;height:18px;flex:0 0 18px;border:2px solid #527d96;border-radius:5px;margin-top:1px}.task.done .dot{background:var(--green);border-color:var(--green);box-shadow:inset 0 0 0 3px #0b1c2b}.task.done .taskname{text-decoration:line-through;color:#769b9a}.taskname{font-weight:650}.task small{display:block;color:var(--muted);margin-top:2px}.bar{height:8px;background:#172e40;border-radius:8px;overflow:hidden;margin:10px 0 4px}.bar span{height:100%;display:block;background:linear-gradient(90deg,#31c6ff,#72f1b1);width:0;transition:width .3s}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{font-size:13px;padding:10px 8px}.feed{height:140px;overflow:auto;font-size:12px;color:#a9c2d5}.feed div{padding:5px 0;border-bottom:1px solid #142d40}.feed .alert{color:#ffbd79}.feed .good{color:var(--green)}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}.kbd{display:inline-block;padding:2px 6px;border:1px solid #355a70;border-radius:5px;color:#d5eafa;background:#0b1b28}
+.mobile-controls{display:none;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,42px);gap:5px;justify-content:center;margin-top:10px}.mobile-controls button{padding:0;font-size:18px}.mobile-controls .up{grid-column:2}.mobile-controls .left{grid-column:1;grid-row:2}.mobile-controls .down{grid-column:2;grid-row:2}.mobile-controls .right{grid-column:3;grid-row:2}
+#taskModal .puzzle-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.puzzle-board button{min-height:58px;font-size:20px}.puzzle-board button.selected{border-color:var(--cyan);background:#14506b;box-shadow:0 0 0 2px #55d7ff33}
+.puzzle-note{color:var(--muted);font-size:13px}
+@media(max-width:850px){main{grid-template-columns:1fr;padding:10px}.side{display:grid;grid-template-columns:1fr 1fr}.side .panel:first-child,.side .panel:last-child{grid-column:1/-1}.feed{height:95px}header{padding:10px 12px}.stats{gap:5px}.stat{padding:5px 8px;min-width:70px}.stat strong{font-size:15px}}
+@media(max-width:520px){.side{display:flex}.logo{font-size:16px}.stat small{font-size:9px}.stat strong{font-size:14px}.mobile-controls{display:grid}.hud{font-size:11px}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ÚLTIMO TREM <span>PARA LUGAR NENHUM</span></div>
+  <div class="stats">
+    <div class="stat"><small>Tempo restante</small><strong id="clock">08:00</strong></div>
+    <div class="stat"><small>Tripulação</small><strong id="players">6 ativos</strong></div>
+    <div class="stat"><small>Progresso</small><strong id="progress">0%</strong></div>
+  </div>
+</header>
+<main>
+<section class="stage">
+ <div class="canvas-wrap">
+  <canvas id="game" width="960" height="600" aria-label="Mapa jogável do trem"></canvas>
+  <div class="overlay" id="startOverlay">
+   <div class="modal">
+    <div class="sub accent">PROTÓTIPO JOGÁVEL · MODO LOCAL</div>
+    <h1>O trem não deveria estar aqui.</h1>
+    <p>Seis passageiros, cinco vagões e uma rota que muda sozinha. Complete os reparos — ou sabote a viagem sem ser descoberto.</p>
+    <p><b>Seu papel é aleatório:</b> você pode ser um Passageiro ou o Passageiro Fantasma. Os outros personagens são controlados pelo jogo.</p>
+    <button class="primary" id="startBtn">INICIAR PARTIDA</button>
+    <button class="secondary" id="howBtn">COMO JOGAR</button>
+    <p class="sub" id="howText" hidden>Use WASD/setas para andar. Chegue perto de um terminal e pressione E ou toque em “Interagir”. Se for o Fantasma, use sabotagem perto de um sistema. Complete 4 reparos antes do tempo acabar; o Fantasma vence se o tempo zerar ou a suspeita subir demais.</p>
+   </div>
+  </div>
+  <div class="overlay" id="taskModal" hidden>
+   <div class="modal">
+    <div class="sub accent">TERMINAL DE MANUTENÇÃO</div><h1 id="puzzleTitle">Reiniciar circuito</h1>
+    <p id="puzzleDesc">Repita a sequência de luzes na ordem correta.</p>
+    <div id="puzzleBoard" class="puzzle-board"></div>
+    <div class="puzzle-note" id="puzzleNote">Escolha os símbolos na ordem indicada.</div>
+    <button class="secondary" id="closePuzzle">Voltar ao trem</button>
+   </div>
+  </div>
+ </div>
+ <div class="hud"><span><span class="kbd">W A S D</span> / <span class="kbd">↑ ↓ ← →</span> mover · <span class="kbd">E</span> interagir</span><span id="nearby">Explore os vagões para encontrar terminais.</span></div>
+ <div class="mobile-controls" aria-label="Controles de movimento">
+  <button class="up" data-move="up">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="down">▼</button><button class="right" data-move="right">▶</button>
+ </div>
+</section>
+<aside class="side">
+ <div class="panel">
+  <h2>Seu papel</h2><div class="role" id="roleName">Ainda não definido</div>
+  <div class="sub" id="roleDesc">Inicie a partida para receber seu papel secreto.</div>
+  <div class="bar"><span id="suspicionBar"></span></div><div class="sub" id="suspicionText">Suspeita: 0%</div>
+ </div>
+ <div class="panel">
+  <h2>Objetivos do grupo</h2>
+  <div id="taskList"></div>
+  <div class="bar"><span id="taskBar"></span></div><div class="sub" id="taskCount">0 de 4 reparos concluídos</div>
+ </div>
+ <div class="panel">
+  <h2>Ações</h2>
+  <div class="actions">
+   <button id="interactBtn">◎ Interagir</button><button id="sabotageBtn">⚡ Sabotar</button>
+   <button id="reportBtn">◉ Reunião</button><button id="mapBtn">⌖ Dica de rota</button>
+  </div>
+  <p class="sub" id="actionHint">Aproxime-se de um terminal para interagir.</p>
+ </div>
+ <div class="panel">
+  <h2>Registro de bordo</h2><div class="feed" id="feed"></div>
+ </div>
+</aside>
+</main>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+const W=960,H=600;
+let running=false,role=null,timeLeft=480,suspicion=0,done=0,meetingUsed=false,gameOver=false;
+let player={x:120,y:300,r:13,speed:2.6};
+const tasks=[
+ {id:0,name:'Restaurar energia',desc:'Vagão 1 · Quadro elétrico',x:150,y:145,done:false,type:'wires'},
+ {id:1,name:'Reparar as portas',desc:'Vagão 2 · Console de acesso',x:375,y:390,done:false,type:'sequence'},
+ {id:2,name:'Reativar o controle',desc:'Vagão 3 · Painel central',x:600,y:155,done:false,type:'wires'},
+ {id:3,name:'Ajustar o freio',desc:'Vagão 4 · Válvula de pressão',x:805,y:405,done:false,type:'sequence'}
+];
+const bots=[
+ {name:'Luna',x:215,y:220,color:'#58b9ff',state:'task',task:0,alive:true},
+ {name:'Bruno',x:490,y:170,color:'#ffb05c',state:'walk',task:1,alive:true},
+ {name:'Rafa',x:300,y:455,color:'#72e39a',state:'task',task:1,alive:true},
+ {name:'Carla',x:710,y:265,color:'#ff7e9b',state:'walk',task:2,alive:true},
+ {name:'Diego',x:790,y:500,color:'#c49aff',state:'task',task:3,alive:true}
+];
+const rooms=[
+ {x:30,y:80,w:205,h:180,name:'VAGÃO 01 · ENERGIA'},
+ {x:245,y:80,w:190,h:440,name:'VAGÃO 02 · CABINES'},
+ {x:445,y:80,w:205,h:205,name:'VAGÃO 03 · CONTROLE'},
+ {x:445,y:300,w:205,h:220,name:'VAGÃO 04 · OFICINA'},
+ {x:660,y:80,w:270,h:440,name:'VAGÃO 05 · FREIOS'}
+];
+let keys={},last=0,near=null,particles=[],sequence=[],seqInput=[],seqStep=0,puzzleTask=null,buttonsHeld={};
+function log(msg,cls=''){const d=document.createElement('div');d.textContent=msg; if(cls)d.className=cls;$('feed').prepend(d);while($('feed').children.length>18)$('feed').lastChild.remove();}
+function setTaskList(){ $('taskList').innerHTML='';tasks.forEach(t=>{let d=document.createElement('div');d.className='task'+(t.done?' done':'');d.innerHTML=`<span class="dot"></span><div><div class="taskname">${t.name}</div><small>${t.desc}</small></div>`;$('taskList').append(d)});$('taskCount').textContent=`${done} de ${tasks.length} reparos concluídos`;$('taskBar').style.width=(done/tasks.length*100)+'%';$('progress').textContent=Math.round(done/tasks.length*100)+'%';}
+function start(){
+ running=true;gameOver=false;timeLeft=480;suspicion=0;done=0;meetingUsed=false;player={x:100,y:310,r:13,speed:2.7};tasks.forEach(t=>t.done=false);
+ bots.forEach((b,i)=>{b.x=[215,500,300,710,790][i];b.y=[220,170,455,265,500][i];b.state=Math.random()<.5?'task':'walk';b.task=(i+Math.floor(Math.random()*3))%tasks.length;b.alive=true;});
+ role=Math.random()<.27?'ghost':'passenger';
+ $('roleName').textContent=role==='ghost'?'PASSAGEIRO FANTASMA':'PASSAGEIRO';$('roleName').className='role '+(role==='ghost'?'':'passenger');
+ $('roleDesc').textContent=role==='ghost'?'Atrase o trem e confunda a tripulação. Sabote sistemas perto dos terminais, mas evite levantar suspeitas.':'Complete reparos, observe comportamentos estranhos e sobreviva até a partida do trem.';
+ $('suspicionBar').style.width='0%';$('suspicionText').textContent='Suspeita: 0%';$('startOverlay').hidden=true;log(role==='ghost'?'Você é o Passageiro Fantasma. Não deixe pistas.':'Você é um Passageiro. Conserte o trem e fique atento.','alert');log('O trem entrou em uma zona sem sinal.');setTaskList();last=performance.now();requestAnimationFrame(loop);
+}
+function end(winner,msg){gameOver=true;running=false;$('startOverlay').hidden=false;$('startOverlay').querySelector('.sub').textContent='FIM DE PARTIDA';$('startOverlay').querySelector('h1').textContent=winner;$('startOverlay').querySelector('p').textContent=msg;$('startBtn').textContent='JOGAR NOVAMENTE';$('howBtn').hidden=true;}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ // background and rails
+ ctx.fillStyle='#06101b';ctx.fillRect(0,0,W,H);
+ for(let x=0;x<W;x+=32){ctx.strokeStyle='#0d2333';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+ for(let y=0;y<H;y+=32){ctx.strokeStyle='#0d2333';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ // outside train shell
+ ctx.fillStyle='#101f2b';ctx.strokeStyle='#284e65';ctx.lineWidth=4;roundRect(ctx,15,60,930,490,18,true,true);
+ rooms.forEach((r,i)=>{
+  ctx.fillStyle=['#152d3a','#182b39','#142f40','#192a3a','#172d3b'][i];ctx.fillRect(r.x,r.y,r.w,r.h);
+  ctx.strokeStyle='#426078';ctx.lineWidth=2;ctx.strokeRect(r.x,r.y,r.w,r.h);
+  ctx.fillStyle='#254459';ctx.fillRect(r.x+8,r.y+8,r.w-16,23);
+  ctx.fillStyle='#a6c8dc';ctx.font='bold 11px system-ui';ctx.fillText(r.name,r.x+14,r.y+24);
+  // floor tiles
+  ctx.strokeStyle='#203c4d';ctx.lineWidth=1;for(let x=r.x+8;x<r.x+r.w;x+=28){ctx.beginPath();ctx.moveTo(x,r.y+34);ctx.lineTo(x,r.y+r.h-8);ctx.stroke()}for(let y=r.y+45;y<r.y+r.h;y+=28){ctx.beginPath();ctx.moveTo(r.x+5,y);ctx.lineTo(r.x+r.w-5,y);ctx.stroke()}
+ });
+ // connecting doors
+ [[235,270],[435,270],[650,270],[650,405]].forEach(([x,y])=>{ctx.fillStyle='#55d7ff';ctx.fillRect(x-5,y-18,10,36);ctx.fillStyle='#183c50';ctx.fillRect(x-2,y-14,4,28)});
+ // furniture
+ drawConsole(85,105,'⚡','#ffcf6a');drawConsole(330,330,'▤','#55d7ff');drawConsole(550,110,'⌘','#c49aff');drawConsole(740,360,'◉','#ff9b72');
+ // benches, lockers, odd portal
+ [[60,200,70,20],[265,150,60,20],[285,430,75,20],[470,225,65,20],[685,175,70,20],[760,455,80,20]].forEach(([x,y,w,h])=>{ctx.fillStyle='#29495b';ctx.fillRect(x,y,w,h);ctx.fillStyle='#467085';ctx.fillRect(x,y,w,4);ctx.strokeStyle='#102333';ctx.strokeRect(x,y,w,h)});
+ // task points
+ tasks.forEach(t=>{ctx.save();ctx.translate(t.x,t.y);ctx.fillStyle=t.done?'#4fe3a1':'#4dcfff';ctx.globalAlpha=.18;ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=t.done?'#4fe3a1':'#55d7ff';ctx.fillRect(-10,-10,20,20);ctx.strokeStyle='#07131e';ctx.lineWidth=2;ctx.strokeRect(-10,-10,20,20);ctx.fillStyle='#082034';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText(t.done?'✓':'+',0,5);ctx.restore()});
+ // bots
+ bots.forEach(b=>{if(!b.alive)return;drawChar(b.x,b.y,b.color,b.name,false)});
+ drawChar(player.x,player.y,role==='ghost'?'#c49aff':'#6de3ee','VOCÊ',true);
+ // dark vignette / scanner lines
+ const g=ctx.createRadialGradient(player.x,player.y,80,player.x,player.y,520);g.addColorStop(0,'#00000000');g.addColorStop(1,'#02070a88');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // interaction radius
+ if(near){ctx.strokeStyle='#7de9ff';ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(near.x,near.y,25,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])}
+}
+function roundRect(c,x,y,w,h,r,fill,stroke){c.beginPath();c.roundRect(x,y,w,h,r);if(fill)c.fill();if(stroke)c.stroke()}
+function drawConsole(x,y,symbol,color){ctx.fillStyle='#0a1721';ctx.fillRect(x,y,35,38);ctx.fillStyle='#284b5e';ctx.fillRect(x+3,y+3,29,25);ctx.fillStyle=color;ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.fillText(symbol,x+17,y+22);ctx.fillStyle='#5b8195';ctx.fillRect(x+7,y+31,21,3)}
+function drawChar(x,y,color,name,isPlayer){
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='#02070b88';ctx.beginPath();ctx.ellipse(0,12,15,7,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-10,-12,20,26,8);ctx.fill();ctx.fillStyle='#bcecff';ctx.beginPath();ctx.roundRect(-7,-9,14,8,4);ctx.fill();ctx.fillStyle='#183245';ctx.fillRect(-6,13,5,5);ctx.fillRect(2,13,5,5);
+ if(isPlayer){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,17,0,Math.PI*2);ctx.stroke()}
+ ctx.fillStyle='#eaf8ff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(name,0,-20);ctx.restore();
+}
+function findNear(){let best=null,dist=Infinity;tasks.forEach(t=>{let d=Math.hypot(player.x-t.x,player.y-t.y);if(d<dist&&d<48&&!t.done){best=t;dist=d}});return best}
+function updateUI(){near=findNear();$('nearby').textContent=near?`Terminal próximo: ${near.name} · pressione E`:'Explore os vagões para encontrar terminais.';$('interactBtn').disabled=!near||!running;$('sabotageBtn').disabled=role!=='ghost'||!running;$('sabotageBtn').textContent=role==='ghost'?'⚡ Sabotar':'⚡ Sabotagem (Fantasma)';$('players').textContent=`${bots.filter(b=>b.alive).length+1} ativos`;$('suspicionBar').style.width=Math.min(100,suspicion)+'%';$('suspicionText').textContent=`Suspeita: ${Math.round(suspicion)}%`;}
+function movePlayer(dt){let dx=0,dy=0;if(keys.ArrowLeft||keys.a||buttonsHeld.left)dx--;if(keys.ArrowRight||keys.d||buttonsHeld.right)dx++;if(keys.ArrowUp||keys.w||buttonsHeld.up)dy--;if(keys.ArrowDown||keys.s||buttonsHeld.down)dy++;if(dx&&dy){dx*=.707;dy*=.707}player.x=Math.max(28,Math.min(930,player.x+dx*player.speed*dt));player.y=Math.max(80,Math.min(525,player.y+dy*player.speed*dt));}
+function botAI(dt){
+ bots.forEach((b,i)=>{if(!b.alive)return;
+  if(b.state==='task'){let t=tasks[b.task];if(t&&!t.done){let d=Math.hypot(t.x-b.x,t.y-b.y);if(d>10){b.x+=(t.x-b.x)/d*0.5*dt;b.y+=(t.y-b.y)/d*0.5*dt}else if(Math.random()<.0015*dt){if(role==='ghost'&&Math.random()<.3){suspicion+=5;log(`${b.name} encontrou uma falha estranha.`, 'alert')}else{t.done=true;done++;setTaskList();log(`${b.name} concluiu: ${t.name}.`,'good')}}}else b.state='walk';
+  }else{b.x+=Math.sin(performance.now()/900+i*4)*.55*dt;b.y+=Math.cos(performance.now()/1100+i*3)*.42*dt;b.x=Math.max(45,Math.min(910,b.x));b.y=Math.max(110,Math.min(500,b.y));if(Math.random()<.004*dt){b.state='task';let pending=tasks.filter(t=>!t.done);if(pending.length)b.task=pending[Math.floor(Math.random()*pending.length)].id}}
+  if(role==='ghost'&&Math.hypot(player.x-b.x,player.y-b.y)<25&&Math.random()<.0008*dt){suspicion+=2}
+ });
+}
+function loop(now){if(!running)return;let dt=Math.min(2,(now-last)/16.67||1);last=now;movePlayer(dt);botAI(dt);draw();updateUI();timeLeft-=dt/60;if(timeLeft<=0){timeLeft=0;renderClock();end(role==='ghost'?'O Fantasma venceu':'A viagem foi perdida','O tempo acabou antes que o trem pudesse partir.');return}if(done===tasks.length){end(role==='ghost'?'Você escapou da suspeita':'A tripulação venceu','Todos os sistemas foram reparados e o trem finalmente partiu.');return}if(suspicion>=100){end(role==='ghost'?'Você foi descoberto':'A anomalia foi exposta','A tripulação identificou a interferência e encerrou a viagem.');return}renderClock();requestAnimationFrame(loop)}
+function renderClock(){let s=Math.ceil(timeLeft);$('clock').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+function interact(){if(!running)return;near=findNear();if(!near){log('Nenhum terminal ao alcance. Aproxime-se de um ícone azul.');return}openPuzzle(near)}
+function openPuzzle(t){puzzleTask=t;$('taskModal').hidden=false;$('puzzleTitle').textContent=t.name;$('puzzleDesc').textContent=t.type==='wires'?'Conecte os três módulos na ordem correta para restaurar o sistema.':'Memorize e repita a sequência de símbolos para calibrar o sistema.';const board=$('puzzleBoard');board.innerHTML='';$('puzzleNote').textContent='Escolha os símbolos na ordem indicada.';seqInput=[];sequence=t.type==='wires'?[0,1,2]:Array.from({length:3},()=>Math.floor(Math.random()*3));if(t.type==='wires'){[0,1,2].forEach((v)=>{let b=document.createElement('button');b.textContent=['⚡','◇','●'][v];b.onclick=()=>{if(seqInput.includes(v))return;seqInput.push(v);b.classList.add('selected');if(seqInput.length===3){if(seqInput.every((n,i)=>n===i))completeTask(t);else{$('puzzleNote').textContent='Conexão incorreta. Tente novamente.';setTimeout(()=>openPuzzle(t),700)}}};board.append(b)})}else{sequence=[0,2,1];$('puzzleNote').textContent='Sequência correta: ◇ → ● → ⚡';[0,1,2].forEach(v=>{let b=document.createElement('button');b.textContent=['◇','⚡','●'][v];b.onclick=()=>{seqInput.push(v);b.classList.add('selected');if(seqInput.length===3){if(seqInput.join(',')==='0,2,1')completeTask(t);else{$('puzzleNote').textContent='Sequência errada. Tente de novo.';setTimeout(()=>openPuzzle(t),700)}}};board.append(b)})}}
+function completeTask(t){if(!t.done){t.done=true;done++;setTaskList();log(`Você concluiu: ${t.name}.`,'good');if(role==='ghost'){suspicion+=10;log('Você deixou um rastro de energia instável.','alert')}}$('taskModal').hidden=true}
+function sabotage(){if(!running||role!=='ghost')return;let closest=tasks.reduce((a,t)=>!a||Math.hypot(player.x-t.x,player.y-t.y)<Math.hypot(player.x-a.x,player.y-a.y)?t:a,null);if(!closest||Math.hypot(player.x-closest.x,player.y-closest.y)>90){log('Aproxime-se de um terminal para sabotar.');return}if(closest.done){closest.done=false;done--;setTaskList();suspicion+=8;log(`Falha no sistema: ${closest.name}. Você deixou um rastro!`,'alert')}else{timeLeft=Math.max(0,timeLeft-25);suspicion+=4;log(`Você atrasou o trem perto de ${closest.name}.`,'alert')} }
+function meeting(){if(!running||meetingUsed)return;meetingUsed=true;log('Reunião de emergência: todos discutem as anomalias.','alert');if(role==='ghost'){suspicion+=18;log('As perguntas da tripulação aumentaram a suspeita sobre você.','alert')}else{let suspect=bots[Math.floor(Math.random()*bots.length)];log(`${suspect.name} foi apontado como suspeito, mas não há provas suficientes.`)}$('reportBtn').disabled=true;}
+function hint(){if(!running)return;let t=tasks.filter(t=>!t.done).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];if(t){log(`Dica de rota: procure ${t.name} — ${t.desc}.`);$('actionHint').textContent=`Mais próximo: ${t.name}.`}}
+document.addEventListener('keydown',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[k]=true;if(k==='e')interact();if(k==='q')sabotage();if(k==='r')meeting()});
+document.addEventListener('keyup',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
+document.querySelectorAll('[data-move]').forEach(b=>{const dir=b.dataset.move;const on=()=>buttonsHeld[dir]=true,off=()=>buttonsHeld[dir]=false;b.addEventListener('pointerdown',e=>{e.preventDefault();on()});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off))});
+$('startBtn').onclick=start;$('howBtn').onclick=()=>{$('howText').hidden=!$('howText').hidden};$('interactBtn').onclick=interact;$('sabotageBtn').onclick=sabotage;$('reportBtn').onclick=meeting;$('mapBtn').onclick=hint;$('closePuzzle').onclick=()=>{$('taskModal').hidden=true};
+canvas.addEventListener('pointerdown',e=>{if(!running)return;let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;let t=tasks.find(t=>Math.hypot(t.x-x,t.y-y)<30);if(t&&!t.done){let d=Math.hypot(player.x-t.x,player.y-t.y);if(d<80)openPuzzle(t);else log('Chegue mais perto do terminal para interagir.')}});
+setTaskList();draw();log('Bem-vindo ao Último Trem para Lugar Nenhum.'); 
+})();
+</script>
+</body>
+</html>
