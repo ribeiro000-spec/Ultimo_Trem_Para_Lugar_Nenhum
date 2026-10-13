@@ -156,14 +156,17 @@ const th=()=>THEMES[ORD[stNo%7]],GEN=['wires','seq','sw','timing','code','whack'
 const COLN=[['vermelho','#e03030'],['laranja','#ff9020'],['amarelo','#e8d030'],['verde','#30c060'],['azul','#3070e0'],['roxo','#8a50e0'],['rosa','#ff6090'],['branco','#eef2f6'],['ciano','#30d0c8'],['marrom','#7a4a2a'],['preto','#15151c']];
 const HN={cap:'o boné',beanie:'o gorro',helmet:'o capacete',ant:'a antena',phones:'o fone',halo:'o halo'},zn2=z=>z>9?'da plataforma':'do vagão '+(z+1);
 const cn=h=>{const n=parseInt(h.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;return COLN.map(([k,x])=>{const m=parseInt(x.slice(1),16);return[k,(r-(m>>16&255))**2+(g-(m>>8&255))**2+(b-(m&255))**2]}).sort((p,q)=>p[1]-q[1])[0][0]};
-function hint(c,zn){const L=c.look,ks=['suit'];if(L.hat!=='none')ks.push('hat','hat');if(zn!=null&&c.prev!=null)ks.push('from','from');const k=pick(ks),o=(a,b)=>Math.random()<.5?`${a} ou ${b}`:`${b} ou ${a}`,dec=a=>pick(COLN.map(x=>x[0]).filter(x=>x!==a));
- if(k==='from')return 'veio '+o(zn2(c.prev),zn2(pick([0,1,2,3,4,10].filter(q=>q!==c.prev&&q!==zn))));
- if(k==='hat'){const a=cn(L.hatc);return `${HN[L.hat]} parece ser ${o(a,dec(a))}`}
- const a=cn(L.suit);return `a roupa parece ser ${o(a,dec(a))}`}
-
+let got={p:0,m:0};
+function getHint(c,zn){const L=c.look,others=all.filter(o=>o!==c),o2=(a,b)=>Math.random()<.5?`${a} ou ${b}`:`${b} ou ${a}`,av=[];if(!got.p)av.push('p');if(!got.m&&(zn!=null?c.prev!=null:true))av.push('m');if(!av.length)return null;const k=pick(av);got[k]=1;
+ if(k==='m'){const a=c.prev!=null?c.prev:c.z0,b=pick([0,1,2,3,4,10].filter(q=>q!==a));return (zn!=null?'veio ':'foi visto por último perto ')+o2(zn2(a),zn2(b))}
+ const hat=L.hat!=='none'&&Math.random()<.5,key=hat?'hatc':'suit',a=cn(L[key]),pool=others.map(x=>cn(x.look[key])).filter(x=>x!==a),b=pick(pool.length?pool:COLN.map(x=>x[0]).filter(x=>x!==a));
+ return `${hat?'o acessório de cabeça':'a roupa'} parece ser ${o2(a,b)}`}
 const IMG={};
-function loadAssets(){const L={};for(let i=0;i<5;i++){L['tc'+i]='assets/tiles/vagao'+i+'.png';L['wl'+i]='assets/walls/vagao'+i+'.png'}for(let i=0;i<7;i++)L['tp'+i]='assets/tiles/plataforma'+i+'.png';
+function loadAssets(){const L={};for(let i=0;i<5;i++){L['tc'+i]='assets/tiles/vagao'+i+'.png';L['wl'+i]='assets/walls/vagao'+i+'.png'}for(let i=0;i<7;i++)L['tp'+i]='assets/tiles/plataforma'+i+'.png';const PN=['crate','gen','vend','locker','plant','lamp','shelf','barrel','bench','table','pillar','tree','cactus','gear','sofa0','sofa1','sofa2'];for(let i=0;i<7;i++)PN.push('rock'+i,'crystal'+i,'tank'+i);PN.forEach(n=>L['p_'+n]='assets/props/'+n+'.png');['body','head','hair','hat_cap','hat_beanie','hat_helmet','hat_ant','hat_phones','hat_halo'].forEach(n=>L['c_'+n]='assets/chars/'+n+'.png');
  return Promise.all(Object.entries(L).map(([k,src])=>new Promise(r=>{const m=new Image();m.onload=()=>{IMG[k]=m;r()};m.onerror=()=>r();m.src=src})))}
+const CH={};
+function chSheet(L){const key=[L.suit,L.skin,L.hair,L.hat,L.hatc].join();if(CH[key])return CH[key];const cv2=document.createElement('canvas');cv2.width=384;cv2.height=168;const g=cv2.getContext('2d');
+ [['body',L.suit],['head',L.skin],['hair',L.hair],['hat_'+L.hat,L.hatc]].forEach(([n,c])=>{const im=IMG['c_'+n];if(!im)return;const t=document.createElement('canvas');t.width=384;t.height=168;const x=t.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='multiply';x.fillStyle=c;x.fillRect(0,0,384,168);x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);g.drawImage(t,0,0)});CH[key]=cv2;return cv2}
 function tle(im,gx,gy,c,pts,f,st){if(im){const[X,Y]=P(gx,gy);c.drawImage(im,(Math.floor(gx+gy)&1)*128,0,128,64,X-32,Y,64,32)}else poly(c,pts,f,st)}
 const fog=document.createElement('canvas');fog.width=300;fog.height=140;{const g=fog.getContext('2d'),r=g.createRadialGradient(150,150,0,150,150,150);r.addColorStop(0,'rgba(170,200,225,1)');r.addColorStop(1,'rgba(170,200,225,0)');g.scale(1,.47);g.fillStyle=r;g.fillRect(0,0,300,300)}
 /* ---------- som ---------- */
@@ -194,13 +197,13 @@ function propD(f,c){const{x,y,w,d,k}=f,t=th(),[X,Y]=P(x+w/2,y+d/2,0);
  else if(k==='tank'){boxD(c,x,y,w,d,1.3,'#46606a');poly(c,[P(x+.1,y+d,.3),P(x+w-.1,y+d,.3),P(x+w-.1,y+d,1.1),P(x+.1,y+d,1.1)],t.tint+'88','#000a')}
  else{c.strokeStyle='#d9b04a';c.lineWidth=5;c.setLineDash([5,4]);c.lineDashOffset=-now*10;c.beginPath();c.arc(X,Y-26,15,0,7);c.stroke();c.setLineDash([]);c.beginPath();c.arc(X,Y-26,4,0,7);c.stroke()}}
 function placeProps(){for(let i=F.length;i--;)if(F[i].t==='prop')F.splice(i,1);const t=th();[3,11,19,27,35].forEach((x,i)=>F.push({car:0,t:'prop',k:t.pr[i%2],x,y:12.8,w:.9,d:.9,h:1.2}));blockers()}
-function placePK(){PK=[];const c=shuf(CAND);['tool','kit','note','note'].forEach((k,i)=>PK.push({k,x:c[i][0],y:c[i][1]}))}
+function placePK(){PK=[];const c=shuf(CAND);['tool','note','note'].concat(stopNo>=4-hpLevel()?['kit']:[]).forEach((k,i)=>PK.push({k,x:c[i][0],y:c[i][1]}))}
 function setTypes(){T.forEach((t,i)=>t.type=[0,3,5].includes(i)?th().pz:pick(GEN))}
 function pkD(p){const[X,Y]=P(p.x,p.y),b=Math.sin(now*3+p.x)*3,col={tool:'#ffb35c',kit:'#6ef0b0',note:'#e8c23a'}[p.k];ctx.save();ctx.translate(X,Y);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.shadowColor=col;ctx.shadowBlur=12;ctx.beginPath();ctx.ellipse(0,0,15,7.5,0,0,7);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#000a';ctx.beginPath();ctx.arc(0,-20+b,12,0,7);ctx.fill();ctx.stroke();ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText({tool:'🔧',kit:'✚',note:'📜'}[p.k],0,-15+b);ctx.restore()}
 function takePK(p){PK.splice(PK.indexOf(p),1);const g=player.ghost;
  if(p.k==='tool'){if(g){cd.sab=0;cd.q=0;log('Ferramenta roubada: sabotagens prontas!','a')}else{boost=2;log('🔧 Ferramenta! Seu próximo reparo vale dobrado.','g')}}
- else if(p.k==='kit'){if(g)log('Você sabotou o kit de reparos.','a');else{hp=Math.min(100,hp+15);lastLvl=hpLevel();hpUI();log('✚ Kit de reparo: +15% de saúde.','g')}}
- else{if(g)log('Você rasgou a anotação antiga.','a');else{const tp=hint(all.find(c=>c.ghost),null);tips.push(tp);log('📜 Anotação de outra era: o culpado — '+tp+'.','g')}}sfx('ok')}
+ else if(p.k==='kit'){if(g)log('Você sabotou o kit de reparos.','a');else{hp=Math.min(100,hp+10);lastLvl=hpLevel();hpUI();log('✚ Kit de reparo: +10% de saúde.','g')}}
+ else{if(g)log('Você rasgou a anotação antiga.','a');else{const tp=getHint(all.find(c=>c.ghost),null);if(tp){tips.push(tp);log('📜 Anotação de outra era: o culpado — '+tp+'.','g')}else log('📜 A anotação está ilegível: nada de novo.','g')}}sfx('ok')}
 function parts(){const t=th(),[col,vx,vy,sz,sp]=t.p;if(!PS.length)for(let i=0;i<70;i++)PS.push({x:Math.random()*vw,y:Math.random()*vh,r:Math.random()});
  ctx.globalAlpha=night?0:.09;ctx.fillStyle=t.tint;ctx.fillRect(0,0,cv.width,cv.height);ctx.globalAlpha=.75;ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=dpr;
  PS.forEach(p=>{p.x+=(vx*(.6+p.r)+Math.sin(now*2+p.r*9)*(sp==='c'?14:0))*ldt;p.y+=vy*(.6+p.r)*ldt;if(p.x>vw+10)p.x=-10;if(p.x<-10)p.x=vw+10;if(p.y>vh+10)p.y=-10;if(p.y<-10)p.y=vh+10;
@@ -234,7 +237,7 @@ function build(){off=document.createElement('canvas');off.width=OW*2;off.height=
  poly(c,[P(40,0),P(40,6),P(40,6,-.4),P(40,0,-.4)],'#0a111b','#1b3346')}
 
 /* ---------- mobiliário e personagens ---------- */
-function drawF(f){const c=ctx,{x,y,w,d,h}=f,m=TM[f.car],pu=.5+.5*Math.sin(now*3+x);
+function drawF(f){const c=ctx,{x,y,w,d,h}=f,m=TM[f.car],pu=.5+.5*Math.sin(now*3+x);const sk=f.t==='prop'?(['rock','crystal','tank'].includes(f.k)?f.k+ORD[stNo%7]:f.k):f.t==='sofa'?'sofa'+f.car%3:f.t,im=IMG['p_'+sk];if(im){const[X,Y]=P(x,y);c.drawImage(im,X-d*32-2,Y-(im.height/2-(w+d)*16-2),im.width/2,im.height/2);return}
  if(f.t==='sofa'||f.t==='bench'){const k=['#8a3e55','#2f6a8a','#7a5a2a','#4a6a3a','#7a3a8a'][f.car];boxD(c,x,y,w,d,.5,k);boxD(c,x,y,w,.3,1,k);boxD(c,x,y,.25,d,.85,k);boxD(c,x+w-.25,y,.25,d,.85,k);boxD(c,x+.3,y+.3,w-.6,d-.3,.58,sh(k,1.25).replace('rgb','rgb'))}
  else if(f.t==='table'){boxD(c,x,y,w,d,.12,'#7a5233',.6);[[0,0],[w-.12,0],[0,d-.12],[w-.12,d-.12]].forEach(([a,b])=>boxD(c,x+a,y+b,.12,.12,.6,'#3a2a1c'));boxD(c,x+w/2-.1,y+d/2-.1,.2,.2,.3,'#d8e6f0',.72);const[X,Y]=P(x+w/2,y+d/2,1.05);c.fillStyle=m.g+'55';c.beginPath();c.arc(X,Y,10+pu*3,0,7);c.fill()}
  else if(f.t==='crate'){boxD(c,x,y,w,d,.9,'#9a6a35');poly(c,[P(x,y+d,.45),P(x+w,y+d,.45),P(x+w,y+d,.55),P(x,y+d,.55)],'#3a2812');poly(c,[P(x+w/2-.08,y,.9),P(x+w/2+.08,y,.9),P(x+w/2+.08,y+d,.9),P(x+w/2-.08,y+d,.9)],'#3a2812')}
@@ -280,9 +283,9 @@ function body(c,L,o){const t=o.t,sw=o.mov?Math.sin(t*11+o.seed):0,bob=o.mov?-Mat
 function drawChar(c){const[X,Y]=P(c.x,c.y);ctx.save();ctx.translate(X,Y);
  ctx.fillStyle='#0009';ctx.beginPath();ctx.ellipse(0,1,11,5,0,0,7);ctx.fill();
  if(c.human){ctx.strokeStyle=c.ghost?'#b58aff':'#3fd0ff';ctx.lineWidth=2;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.ellipse(0,1,16,8,0,0,7);ctx.stroke();ctx.shadowBlur=0}
- body(ctx,c.look,{t:now,mov:c.mov,face:c.face,seed:c.seed});
- const w=ctx.measureText?c.name.length*6.4+12:50;ctx.fillStyle='#000a';rr(ctx,-w/2,-62,w,15,7);ctx.fill();ctx.fillStyle=c.human?'#9ff0ff':'#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(c.name,0,-51);
- if(c.st==='work'&&mode==='play'){ctx.fillStyle='#fff';rr(ctx,10,-66,26,16,7);ctx.fill();ctx.fillStyle='#223';ctx.beginPath();for(let k=0;k<3;k++){ctx.moveTo(17+k*7+2,-58);ctx.arc(17+k*7,-58,2,0,7)}ctx.fill()}
+ if(IMG.c_body){const sp=chSheet({...c.look,hair:c.look.hair||HAIR[(c.seed*7|0)%5]}),fr=c.mov?Math.floor(now*9+c.seed)%4:0;ctx.save();ctx.scale(c.face<0?-1:1,1);ctx.drawImage(sp,fr*96,0,96,168,-17,-58+(c.mov?0:Math.sin(now*2+c.seed)*.6),34,59.5);ctx.restore()}else body(ctx,c.look,{t:now,mov:c.mov,face:c.face,seed:c.seed});
+ const w=ctx.measureText?c.name.length*6.4+12:50;ctx.fillStyle='#000a';rr(ctx,-w/2,-72,w,15,7);ctx.fill();ctx.fillStyle=c.human?'#9ff0ff':'#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(c.name,0,-61);
+ if(c.st==='work'&&mode==='play'){ctx.fillStyle='#fff';rr(ctx,12,-80,26,16,7);ctx.fill();ctx.fillStyle='#223';ctx.beginPath();for(let k=0;k<3;k++){ctx.moveTo(19+k*7+2,-72);ctx.arc(19+k*7,-72,2,0,7)}ctx.fill()}
  ctx.restore()}
 
 /* ---------- colisão e bots ---------- */
@@ -307,26 +310,26 @@ const zone=c=>c.y>6.3?10+Math.floor(c.x/8):Math.floor(c.x/8);
 function sabotageAt(a,t){if(t.prog>0){t.prog=Math.max(0,t.prog-NEED);t.sab=true}else tl=Math.max(5,tl-15);
  const kind=rnd(3);let by=a,who=kind===1?[]:alive().filter(c=>zone(c)===t.zone).map(c=>c.name);
  if(a.human&&framing){framing=false;who=who.filter(n=>n!==a.name);const v=pick(alive().filter(c=>!c.human));if(v){by=v;if(!who.includes(v.name))who.push(v.name)}}
- const rm=t.zone>9?'Estação':TM[t.car].n;clues.push({room:rm,time:mm(tl),who,scan:false,hint:hint(by,t.zone)});who.forEach(n=>sc[n]++);
+ const rm=t.zone>9?'Estação':TM[t.car].n;clues.push({room:rm,time:mm(tl),who,scan:false,by,zone:t.zone});who.forEach(n=>sc[n]++);
  if(kind!==1)alive().forEach(c=>{if(c===a||c.ghost||zone(c)!==t.zone)return;if(!c.human&&Math.abs(c.x-t.x)<5)sc[a.name]+=3;if(c.human)log(`Você viu ${a.name} mexendo no terminal de ${t.n}!`,'a')});
  if(kind===1){dark=9;banner('APAGÃO!','Falha elétrica em '+rm)}else if(kind===2){lockDoor(Math.max(1,Math.min(4,t.car+(t.x%8>4?1:0))),9);banner('PORTA TRAVADA','Passagem selada perto de '+rm)}else banner('ANOMALIA','Curto-circuito em '+rm);
  hurt(dm(1));log(`⚠ ${rm}: reparo desfeito!`,'a');shake=.6;flick=1.4;sfx('sab');setTL()}
 function lockDoor(k,sec=9){lock[k]=sec}
 
 /* ---------- jogo ---------- */
-const hpLevel=()=>hp>66?3:hp>33?2:hp>0?1:0,dm=k=>({e:5,n:7,h:10})[diff]*k;
+const hpLevel=()=>hp>66?3:hp>33?2:hp>0?1:0,dm=k=>({e:9,n:13,h:18})[diff]*k;
 function hpUI(){const l=hpLevel(),c=['#ff3355','#ff3355','#ffb020','#3ddc84'][l];$('hp').innerHTML=[1,2,3].map(i=>`<b style="background:${i<=l?c:''};box-shadow:${i<=l?'0 0 6px '+c:'none'}"></b>`).join('')+`<small style="display:inline;margin-left:4px;font-size:11px">${Math.ceil(hp)}%</small>`}
 function hurt(n){hp=Math.max(0,hp-n);const l=hpLevel();if(l<lastLvl){banner('TREM DANIFICADO',l?`Saúde no nível ${l} — mais uma parada será necessária`:'SAÚDE CRÍTICA!');sfx('sab');shake=.8;flick=1.5;log(`⚠ Saúde do trem caiu para o nível ${l}.`,'a')}lastLvl=l;hpUI()}
-function silentAt(a,t){hurt(dm(.9));const who=alive().filter(c=>zone(c)===t.zone).map(c=>c.name);who.forEach(n=>sc[n]++);clues.push({room:t.zone>9?'Estação':TM[t.car].n,time:mm(tl),who,scan:false,quiet:true,hint:hint(a,t.zone)});
+function silentAt(a,t){hurt(dm(.9));const who=alive().filter(c=>zone(c)===t.zone).map(c=>c.name);who.forEach(n=>sc[n]++);clues.push({room:t.zone>9?'Estação':TM[t.car].n,time:mm(tl),who,scan:false,quiet:true,by:a,zone:t.zone});
  alive().forEach(c=>{if(c===a||c.ghost||zone(c)!==t.zone)return;if(!c.human&&Math.abs(c.x-t.x)<4)sc[a.name]+=2});if(a.human)log('Sabotagem silenciosa feita. O trem sofreu dano.','a')}
 function stationDone(){const need=4-hpLevel();if(stopNo>=need)return finish(true,stopNo>1?`Após ${stopNo} paradas, o trem finalmente escapou.`:'Todos os sistemas foram reparados e o trem partiu.');nextStation()}
 function nextStation(){mode='trans';stopNo++;night=Math.random()<.5;stick.x=stick.y=0;$('pz').hidden=true;$('trT').textContent='ESTAÇÃO '+THEMES[ORD[(stopNo-1)%7]].n.toUpperCase();$('trS').textContent=`Parada ${stopNo} · ${night?'🌙 Noite':'☀ Dia'} · Saúde do trem: nível ${hpLevel()} (${Math.ceil(hp)}%)`;$('tr').hidden=false;sfx('lock');
- setTimeout(()=>{stNo=stopNo-1;build();placeProps();placePK();T.forEach(t=>{t.prog=0;t.sab=false});setTypes();lock=[0,0,0,0,0];dark=0;meets++;tl+=({e:240,n:200,h:160})[diff];all.forEach(c=>{c.st='idle';c.t=1+rnd(3)});$('tr').hidden=true;mode='play';setTL();banner('NOVA ESTAÇÃO','Os reparos recomeçam. Saúde: nível '+hpLevel());log(`Parada ${stopNo}: mais ${4-hpLevel()-stopNo+1>0?'reparos necessários':'um esforço final'}.`)},3800)}
+ setTimeout(()=>{stNo=stopNo-1;got={p:0,m:0};tips=[];build();placeProps();placePK();T.forEach(t=>{t.prog=0;t.sab=false});setTypes();lock=[0,0,0,0,0];dark=0;meets++;tl+=({e:240,n:200,h:160})[diff];all.forEach(c=>{c.st='idle';c.t=1+rnd(3)});$('tr').hidden=true;mode='play';setTL();banner('NOVA ESTAÇÃO','Os reparos recomeçam. Saúde: nível '+hpLevel());log(`Parada ${stopNo}: mais ${4-hpLevel()-stopNo+1>0?'reparos necessários':'um esforço final'}.`)},3800)}
 function mkChar(name,L,human,x,y){return{name,look:L,human,x,y,car:Math.floor(x/8),alive:true,ghost:false,face:1,mov:false,seed:Math.random()*9,st:'idle',t:1+rnd(3),sab:18+rnd(10),tk:null}}
 function initWorld(){T=TD.map(([n,type,car,ico,x,y])=>({n,type,car,ico,x:x||car*8+4,y:y||.4,sy:(y||.4)+1.3,zone:y?10+car:car,prog:0,sab:false}));blockers();
  const names=[['Luna',{skin:SKIN[0],suit:'#3d7fe0',hat:'beanie',hatc:'#f2f5f8'}],['Bruno',{skin:SKIN[2],suit:'#e8872b',hat:'helmet',hatc:'#ff9f1c'}],['Rafa',{skin:SKIN[1],suit:'#2fa05a',hat:'cap',hatc:'#3ddc84'}],['Carla',{skin:SKIN[3],suit:'#c8344a',hat:'phones',hatc:'#f2f5f8'}],['Diego',{skin:SKIN[0],suit:'#7a4ad8',hat:'ant',hatc:'#ff4d4d'}]];
  player=mkChar(myName,look,true,4,3);bots=names.map(([n,l],i)=>mkChar(n,l,false,i*8+3+rnd(3),2.5+rnd(2)));all=[player,...bots];lock=[0,0,0,0,0];clues=[];sc={};all.forEach(c=>sc[c.name]=0);cd={abl:0,sab:0,lk:0};setTL()}
-function start(){aud();diff=document.querySelector('#dfc .on').dataset.d;initWorld();framing=false;dark=0;const g=rnd(6);all[g].ghost=true;hp=100;stopNo=1;lastLvl=3;ORD=shuf([0,1,2,3,4,5,6]);stNo=0;night=Math.random()<.5;boost=1;tips=[];build();placeProps();placePK();setTypes();hpUI();meets=3;tl=({e:660,n:540,h:420})[diff];
+function start(){aud();diff=document.querySelector('#dfc .on').dataset.d;initWorld();framing=false;dark=0;const g=rnd(6);all[g].ghost=true;hp=100;stopNo=1;lastLvl=3;ORD=shuf([0,1,2,3,4,5,6]);stNo=0;night=Math.random()<.5;boost=1;tips=[];got={p:0,m:0};build();placeProps();placePK();setTypes();hpUI();meets=3;tl=({e:660,n:540,h:420})[diff];
  player.x=2;player.y=3;mode='play';paused=false;['menu','cust','how','pz','mt','en'].forEach(i=>$(i).hidden=true);$('hud').hidden=false;$('log').innerHTML='';
  const gh=player.ghost;$('role').className='glass'+(gh?' gh':'');$('rI').textContent=gh?'👻':'🙂';$('rN').textContent=gh?'PASSAGEIRO FANTASMA':'PASSAGEIRO';
  $('rD').innerHTML=gh?'Você altera a realidade sem ser descoberto. <b>Sabotar</b> causa falhas (curto, apagão, portas travadas), <b>Trancar</b> sela uma porta, <b>Apagão</b> esconde rastros e <b>Incriminar</b> joga a culpa em outro e <b>Silêncio</b> danifica o trem sem alarme. Zere a saúde do trem ou esgote o tempo!':'Conserte os sistemas antes do tempo acabar e vigie a saúde do trem: quanto menor, mais paradas; se zerar, vocês perdem. Use <b>Rastros</b> para investigar anomalias e <b>Reunião</b> para votar no Fantasma.';
@@ -361,7 +364,7 @@ function interact(){if(mode!=='play'||!$('pz').hidden||mtOpen)return;const pk=PK
 function sabotage(){if(mode!=='play'||!player.ghost||cd.sab>0||!near||!$('pz').hidden||mtOpen)return;sabotageAt(player,near);cd.sab=({e:12,n:16,h:20})[diff]}
 function ability(){if(mode!=='play'||cd.abl>0||!$('pz').hidden||mtOpen)return;
  if(player.ghost){const k=[1,2,3,4].find(k=>Math.hypot(player.x-8*k,player.y-3)<2.8);if(!k)return;lockDoor(k);sfx('lock');cd.abl=22;log('Você trancou a porta por 9 segundos.','a')}
- else{const c=clues[clues.length-1];if(!c){log('Nenhuma anomalia para analisar ainda.');return}c.scan=true;cd.abl=20;log(`Rastros em ${c.room}: ${c.hint}.`,'g')}}
+ else{const c=clues[clues.length-1];if(!c){log('Nenhuma anomalia para analisar ainda.');return}if(c.scan){log('Esta anomalia já foi analisada.');return}const h=getHint(c.by,c.zone);if(!h){log('Nenhuma pista nova nesta estação.');return}c.hint=h;c.scan=true;cd.abl=20;log(`Rastros em ${c.room}: ${h}.`,'g')}}
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(k.startsWith('Arrow'))e.preventDefault();keys[k]=true;if(k==='e')interact();if(k==='q')sabotage();if(k==='f')ability();if(k==='g')apagao();if(k==='h')frame();if(k==='z')quiet();if(k==='r')meeting();if(k==='Escape')$('pz').hidden=true});
 addEventListener('keyup',e=>keys[e.key.length===1?e.key.toLowerCase():e.key]=false);
 const joy=$('joy'),kn=$('knob');let jid=null;
@@ -448,7 +451,7 @@ function sw(id,arr,key){const el=$(id);el.innerHTML='';arr.forEach(c=>{const b=d
 sw('swSkin',SKIN,'skin');sw('swSuit',SUIT,'suit');sw('swHat',HATC,'hatc');
 HATS.forEach(([k,n])=>{const c=document.createElement('div');c.className='chip'+(look.hat===k?' on':'');c.textContent=n;c.onclick=()=>{look.hat=k;[...$('hats').children].forEach(x=>x.classList.remove('on'));c.classList.add('on')};$('hats').append(c)});
 $('nm').value=myName;
-function preview(){if($('cust').hidden)return;const c=$('pv').getContext('2d');c.clearRect(0,0,170,190);c.save();c.translate(85,150);c.fillStyle='#0008';c.beginPath();c.ellipse(0,2,34,12,0,0,7);c.fill();c.scale(3.1,3.1);body(c,look,{t:now,mov:false,face:1,seed:1});c.restore();c.fillStyle='#fff';c.font='bold 14px system-ui';c.textAlign='center';c.fillText($('nm').value||'Viajante',85,184)}
+function preview(){if($('cust').hidden)return;const c=$('pv').getContext('2d');c.clearRect(0,0,170,190);c.save();c.translate(85,150);c.fillStyle='#0008';c.beginPath();c.ellipse(0,2,34,12,0,0,7);c.fill();c.scale(3.1,3.1);if(IMG.c_body)c.drawImage(chSheet({...look,hair:HAIR[0]}),0,0,96,168,-17,-58,34,59.5);else body(c,look,{t:now,mov:false,face:1,seed:1});c.restore();c.fillStyle='#fff';c.font='bold 14px system-ui';c.textAlign='center';c.fillText($('nm').value||'Viajante',85,184)}
 
 /* ---------- desenho ---------- */
 function resize(){dpr=Math.min(2,devicePixelRatio||1);vw=innerWidth;vh=innerHeight;cv.width=vw*dpr;cv.height=vh*dpr;Z=Math.max(.95,Math.min(1.7,vw/330))}
